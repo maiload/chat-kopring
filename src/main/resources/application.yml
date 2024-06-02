@@ -1,0 +1,52 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true     # request, response 에 인코딩 강제
+
+spring:
+  application:
+    name: chat-kopring
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/chat
+    username: jin
+    password: jin123
+
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: true
+        highlight_sql: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+#            client-id:
+#            client-secret:
+            redirect-uri: https://6351-119-196-98-145.ngrok-free.app/login/oauth2/code/google
+            scope:
+              - email
+              - profile
+
+
+logging:
+  #  pattern:
+  #    console: "[%d{HH:mm:ss.SSS}][%-5level][%logger.%method:line%line] - %msg%n"
+  level:
+    org:
+      hibernate:
+        SQL: debug
+        type.descriptor.sql: trace
+
+jwt:
+  secret: 35c7b4f895e434ba6932faa3750f5f12c4d4202bb97530487b79de199ad0eefe

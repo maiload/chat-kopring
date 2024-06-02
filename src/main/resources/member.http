@@ -1,0 +1,45 @@
+### Log in
+GET http://localhost:8080/api/member/login
+
+### Sign up
+POST http://localhost:8080/api/member/signup
+Content-Type: application/json
+
+{
+  "loginId": "jin",
+  "password": "qwer123!",
+  "name": "이정진",
+  "birthDate": "1996-10-24",
+  "gender": "MAN",
+  "email": "jin@email.com"
+}
+
+### Log in
+POST http://localhost:8080/api/member/login
+Content-Type: application/json
+
+{
+  "loginId": "jin",
+  "password": "qwer123!"
+}
+
+### info
+
+GET http://localhost:8080/api/member/info
+Authorization: Bearer
+
+### info update
+
+PUT http://localhost:8080/api/member/info
+Content-Type: application/json
+Authorization: Bearer
+
+{
+  "id": 1,
+  "loginId": "jin",
+  "password": "qwer123!",
+  "name": "이정진",
+  "birthDate": "2000-10-24",
+  "gender": "MAN",
+  "email": "jin@email.com"
+}
