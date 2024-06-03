@@ -4,7 +4,6 @@ import org.example.chatkopring.common.dto.CustomUser
 import org.example.chatkopring.member.entity.Member
 import org.example.chatkopring.member.repository.MemberRepository
 import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException

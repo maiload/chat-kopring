@@ -1,7 +1,6 @@
 package org.example.chatkopring.common.service
 
 import org.example.chatkopring.common.dto.CustomUser
-import org.example.chatkopring.common.exception.InvalidInputException
 import org.example.chatkopring.common.status.Gender
 import org.example.chatkopring.common.status.Role
 import org.example.chatkopring.member.dto.MemberDto
@@ -26,15 +25,14 @@ class CustomOath2UserService(
 
     override fun loadUser(userRequest: OAuth2UserRequest): OAuth2User {
 
-        val attributes  = super.loadUser(userRequest).attributes
-        log.info("Registration Id  : ${userRequest.clientRegistration.registrationId}")
-        val customUser = memberRepository.findByEmail(attributes["email"] as String)?.let { createOAuth2User(it.toDto()) }
+        val attributes = super.loadUser(userRequest).attributes
+        val customUser = memberRepository.findByEmail(attributes["email"] as String)?.let { createOAuth2User(it.toDto(), attributes) }
             ?: createMember(attributes)
 
         return customUser
     }
 
-    private fun createMember(attributes: Map<String, Any>): OAuth2User {
+    private fun createMember(attributes: MutableMap<String, Any>): OAuth2User {
         val memberDto = MemberDto(
             null,
             attributes["email"] as String,
@@ -46,16 +44,17 @@ class CustomOath2UserService(
         )
         memberService.signUp(memberDto, Role.OAUTH_MEMBER)
 
-        return createOAuth2User(memberDto)
+        return createOAuth2User(memberDto, attributes)
     }
 
-    private fun createOAuth2User(memberDto: MemberDto): OAuth2User {
+    private fun createOAuth2User(memberDto: MemberDto, attributes: MutableMap<String, Any>): OAuth2User {
         val id = memberRepository.findByEmail(memberDto.email)?.id
         return CustomUser(
             id!!,
             memberDto.loginId,
             passwordEncoder.encode(memberDto.password),
-            mutableListOf(SimpleGrantedAuthority("ROLE_${Role.OAUTH_MEMBER.name}"))
+            mutableListOf(SimpleGrantedAuthority("ROLE_${Role.OAUTH_MEMBER.name}")),
+            attributes
         )
     }
 }

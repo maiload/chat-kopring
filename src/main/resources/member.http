@@ -26,30 +26,30 @@ Content-Type: application/json
 ### info
 
 GET http://localhost:8080/api/member/info
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImlhdCI6MTcxNzQxNzkxMywiZXhwIjoxNzE3NDE5NzEzfQ._vwINuX5rhqa7o6EL_G_ul7b4JOuzwQzXAuGYh5nvoQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYWlsb2FkNzdAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfT0FVVEhfTUVNQkVSIiwidXNlcklkIjoxLCJpYXQiOjE3MTc0MjMwNTAsImV4cCI6MTcxNzQyNDg1MH0.s-bADus1pQFO0uF65Ieu0HoYfMgb5XMFkC0LZybY4Ro
 
 ### info update
 
 PUT http://localhost:8080/api/member/info
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImlhdCI6MTcxNzQxNzkxMywiZXhwIjoxNzE3NDE5NzEzfQ._vwINuX5rhqa7o6EL_G_ul7b4JOuzwQzXAuGYh5nvoQ
-
-//{
-//  "id": 1,
-//  "loginId": "maiload77@gmail.com",
-//  "password": "qwer123!",
-//  "name": "JJ L",
-//  "birthDate": "2000-01-01",
-//  "gender": "MAN",
-//  "email": "maiload77@gmail.com"
-//}
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYWlsb2FkNzdAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfT0FVVEhfTUVNQkVSIiwidXNlcklkIjoxLCJpYXQiOjE3MTc0MjMwNTAsImV4cCI6MTcxNzQyNDg1MH0.s-bADus1pQFO0uF65Ieu0HoYfMgb5XMFkC0LZybY4Ro
 
 {
   "id": 1,
-  "loginId": "jin",
+  "loginId": "maiload77@gmail.com",
   "password": "qwer123!",
-  "name": "이정진",
-  "birthDate": "2000-10-24",
+  "name": "JJ L",
+  "birthDate": "2000-01-01",
   "gender": "MAN",
-  "email": "jin@email.com"
+  "email": "maiload77@gmail.com"
 }
+
+//{
+//  "id": 1,
+//  "loginId": "jin",
+//  "password": "qwer123!",
+//  "name": "이정진",
+//  "birthDate": "2000-10-24",
+//  "gender": "MAN",
+//  "email": "jin@email.com"
+//}

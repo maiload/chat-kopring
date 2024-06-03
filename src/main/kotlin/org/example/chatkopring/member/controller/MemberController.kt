@@ -4,11 +4,11 @@ import jakarta.validation.Valid
 import org.example.chatkopring.common.authority.TokenInfo
 import org.example.chatkopring.common.dto.BaseResponse
 import org.example.chatkopring.common.dto.CustomUser
-import org.example.chatkopring.common.status.Role
 import org.example.chatkopring.member.dto.LoginDto
 import org.example.chatkopring.member.dto.MemberDto
 import org.example.chatkopring.member.dto.MemberResponse
 import org.example.chatkopring.member.service.MemberService
+import org.example.chatkopring.util.logger
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*
 class MemberController (
     private val memberService: MemberService,
 ){
+    val log = logger()
     /**
      * 로그아웃
      */
@@ -61,8 +62,8 @@ class MemberController (
                    @AuthenticationPrincipal customUser: CustomUser): BaseResponse<Unit> {
         requireNotNull(memberDto.id) { "id가 null 입니다." }
         require(memberDto.id == customUser.userId) { "Token의 id와 dto의 id가 일치하지 않습니다." }
-        val role = customUser.attributes["role"] as String
-        val resultMsg: String = memberService.saveMyInfo(memberDto, role)
+        val authorityRole = customUser.authorities.first().authority    // = SimpleGrantedAuthority.authority
+        val resultMsg: String = memberService.saveMyInfo(memberDto, authorityRole.substring("ROLE_".length))
         return BaseResponse(message = resultMsg)
     }
 }
