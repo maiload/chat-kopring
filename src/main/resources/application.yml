@@ -31,9 +31,7 @@ spring:
       client:
         registration:
           google:
-#            client-id:
-#            client-secret:
-            redirect-uri: https://6351-119-196-98-145.ngrok-free.app/login/oauth2/code/google
+
             scope:
               - email
               - profile

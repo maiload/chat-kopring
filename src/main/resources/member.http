@@ -1,5 +1,5 @@
 ### Log in
-GET http://localhost:8080/api/member/login
+GET http://localhost:8080/login
 
 ### Sign up
 POST http://localhost:8080/api/member/signup
@@ -26,13 +26,23 @@ Content-Type: application/json
 ### info
 
 GET http://localhost:8080/api/member/info
-Authorization: Bearer
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImlhdCI6MTcxNzQxNzkxMywiZXhwIjoxNzE3NDE5NzEzfQ._vwINuX5rhqa7o6EL_G_ul7b4JOuzwQzXAuGYh5nvoQ
 
 ### info update
 
 PUT http://localhost:8080/api/member/info
 Content-Type: application/json
-Authorization: Bearer
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImlhdCI6MTcxNzQxNzkxMywiZXhwIjoxNzE3NDE5NzEzfQ._vwINuX5rhqa7o6EL_G_ul7b4JOuzwQzXAuGYh5nvoQ
+
+//{
+//  "id": 1,
+//  "loginId": "maiload77@gmail.com",
+//  "password": "qwer123!",
+//  "name": "JJ L",
+//  "birthDate": "2000-01-01",
+//  "gender": "MAN",
+//  "email": "maiload77@gmail.com"
+//}
 
 {
   "id": 1,

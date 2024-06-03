@@ -74,10 +74,10 @@ class MemberService(
     /**
      * 내 정보 수정
      */
-    fun saveMyInfo(memberDto: MemberDto): String {
+    fun saveMyInfo(memberDto: MemberDto, role: String): String {
         val savedPw = memberRepository.findByLoginId(memberDto.loginId)?.password
             ?: throw InvalidInputException("loginId", "존재하지 않는 ID(${memberDto.loginId}) 입니다")
-        require(passwordEncoder.matches(memberDto.password, savedPw)) { "비밀번호를 다시 확인하세요." }
+        if(role == Role.MEMBER.name) require(passwordEncoder.matches(memberDto.password, savedPw)) { "비밀번호를 다시 확인하세요." }
         val member: Member = memberDto.toEntity(savedPw)
         memberRepository.save(member)
         return "수정 완료되었습니다."

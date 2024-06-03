@@ -7,4 +7,5 @@ data class MemberResponse(
     val birthDate: String,
     val gender: String,
     val email: String,
+    val role: String,
 )

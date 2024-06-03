@@ -4,6 +4,7 @@ import jakarta.validation.Valid
 import org.example.chatkopring.common.authority.TokenInfo
 import org.example.chatkopring.common.dto.BaseResponse
 import org.example.chatkopring.common.dto.CustomUser
+import org.example.chatkopring.common.status.Role
 import org.example.chatkopring.member.dto.LoginDto
 import org.example.chatkopring.member.dto.MemberDto
 import org.example.chatkopring.member.dto.MemberResponse
@@ -42,6 +43,7 @@ class MemberController (
         return BaseResponse(data = tokenInfo)
     }
 
+
     /**
      * 내 정보 조회
      */
@@ -59,7 +61,8 @@ class MemberController (
                    @AuthenticationPrincipal customUser: CustomUser): BaseResponse<Unit> {
         requireNotNull(memberDto.id) { "id가 null 입니다." }
         require(memberDto.id == customUser.userId) { "Token의 id와 dto의 id가 일치하지 않습니다." }
-        val resultMsg: String = memberService.saveMyInfo(memberDto)
+        val role = customUser.attributes["role"] as String
+        val resultMsg: String = memberService.saveMyInfo(memberDto, role)
         return BaseResponse(message = resultMsg)
     }
 }

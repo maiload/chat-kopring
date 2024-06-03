@@ -14,8 +14,8 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
 import java.util.*
 
-//const val EXPIRATION_MILLISECONDS: Long = 30 * 60 * 1000
-const val EXPIRATION_MILLISECONDS: Long = 1 * 60 * 1000
+const val EXPIRATION_MILLISECONDS: Long = 30 * 60 * 1000
+//const val EXPIRATION_MILLISECONDS: Long = 1 * 60 * 1000
 
 @Component
 class JwtTokenProvider {
