@@ -26,6 +26,7 @@ class CustomOath2UserService(
     override fun loadUser(userRequest: OAuth2UserRequest): OAuth2User {
 
         val attributes = super.loadUser(userRequest).attributes
+        log.debug("attributes : {}", attributes)
         val customUser = memberRepository.findByEmail(attributes["email"] as String)?.let { createOAuth2User(it.toDto(), attributes) }
             ?: createMember(attributes)
 

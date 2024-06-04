@@ -31,11 +31,9 @@ spring:
       client:
         registration:
           google:
-
             scope:
               - email
               - profile
-
 
 logging:
   #  pattern:

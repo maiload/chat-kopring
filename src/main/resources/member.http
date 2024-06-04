@@ -26,13 +26,13 @@ Content-Type: application/json
 ### info
 
 GET http://localhost:8080/api/member/info
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYWlsb2FkNzdAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfT0FVVEhfTUVNQkVSIiwidXNlcklkIjoxLCJpYXQiOjE3MTc0MjMwNTAsImV4cCI6MTcxNzQyNDg1MH0.s-bADus1pQFO0uF65Ieu0HoYfMgb5XMFkC0LZybY4Ro
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImlhdCI6MTcxNzQ3MjQ1OSwiZXhwIjoxNzE3NDc0MjU5fQ.lClUr7fuaOk-IH0sDsMjjO5AbhCwVonv6gaREKUY9aQ
 
 ### info update
 
 PUT http://localhost:8080/api/member/info
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYWlsb2FkNzdAZ21haWwuY29tIiwiYXV0aCI6IlJPTEVfT0FVVEhfTUVNQkVSIiwidXNlcklkIjoxLCJpYXQiOjE3MTc0MjMwNTAsImV4cCI6MTcxNzQyNDg1MH0.s-bADus1pQFO0uF65Ieu0HoYfMgb5XMFkC0LZybY4Ro
+Authorization: Bearer
 
 {
   "id": 1,
