@@ -22,8 +22,20 @@ class MemberController (
      * 로그아웃
      */
     @GetMapping("/logout")
-    fun logout(@AuthenticationPrincipal customUser: CustomUser): BaseResponse<Long> {
-        return BaseResponse(data = customUser.userId, message = "Log Out Successfully")
+    fun logout(@RequestHeader("Refresh") refreshToken: String,
+        @AuthenticationPrincipal customUser: CustomUser): BaseResponse<String> {
+        val loginId = customUser.username
+        memberService.logout(loginId, refreshToken)
+        return BaseResponse(data = loginId, message = "Log Out Successfully")
+    }
+
+    /**
+     * 토큰 재발급
+     */
+    @GetMapping("/reissue-token")
+    fun reissueToken(@RequestHeader("Refresh") refreshToken: String): BaseResponse<TokenInfo> {
+        val tokenInfo = memberService.reissueToken(refreshToken)
+        return BaseResponse(data = tokenInfo)
     }
 
     /**

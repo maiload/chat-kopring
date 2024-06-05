@@ -2,7 +2,6 @@ package org.example.chatkopring.chat.controller
 
 import org.example.chatkopring.chat.config.UserSessionRegistry
 import org.example.chatkopring.chat.dto.ChatMessageDto
-import org.example.chatkopring.chat.dto.ChatMessageResponse
 import org.example.chatkopring.chat.dto.ChatRoomDto
 import org.example.chatkopring.chat.dto.MessageType
 import org.example.chatkopring.chat.entity.ChatMessage

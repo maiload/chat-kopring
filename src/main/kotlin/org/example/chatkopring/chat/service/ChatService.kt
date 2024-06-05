@@ -2,7 +2,6 @@ package org.example.chatkopring.chat.service
 
 import jakarta.transaction.Transactional
 import org.example.chatkopring.chat.dto.ChatMessageDto
-import org.example.chatkopring.chat.dto.ChatMessageResponse
 import org.example.chatkopring.chat.dto.ChatRoomDto
 import org.example.chatkopring.chat.dto.MessageType
 import org.example.chatkopring.chat.entity.ChatMessage

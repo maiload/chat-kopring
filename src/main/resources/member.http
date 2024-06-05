@@ -1,6 +1,15 @@
 ### Log in
 GET http://localhost:8080/login
 
+### Logout
+GET http://localhost:8080/api/member/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImlhdCI6MTcxNzU2MDM1MSwiZXhwIjoxNzE3NTYyMTUxfQ.qDv3hcm6HPdPC82fhW-HJrfChhqMHl0EKWZ7fTvuI20
+Refresh: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImV4cCI6MTcxNzY2ODM1MX0.v_BCzjJ8kFKXE58DlZml6mGh1fMn0j2tmbxTQ7UP4wU
+
+### Reissue
+GET http://localhost:8080/api/member/reissue-token
+Refresh: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImV4cCI6MTcxNzY2ODMxMX0.S1PWKmu73FFMyf5F-s-U9ex0FSEqbmYfXLN6hty5qFI
+
 ### Sign up
 POST http://localhost:8080/api/member/signup
 Content-Type: application/json
@@ -26,7 +35,7 @@ Content-Type: application/json
 ### info
 
 GET http://localhost:8080/api/member/info
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImlhdCI6MTcxNzQ3MjQ1OSwiZXhwIjoxNzE3NDc0MjU5fQ.lClUr7fuaOk-IH0sDsMjjO5AbhCwVonv6gaREKUY9aQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImlhdCI6MTcxNzU1ODkxNywiZXhwIjoxNzE3NTYwNzE3fQ.ZkziedpPelaRs8s6MKn1yMRUSEGJVE8QMw8TNBcpbCM
 
 ### info update
 

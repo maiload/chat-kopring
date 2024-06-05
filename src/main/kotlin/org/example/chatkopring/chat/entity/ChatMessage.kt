@@ -17,26 +17,19 @@ import org.example.chatkopring.chat.dto.MessageType
 @Entity
 @Table
 class ChatMessage(
-    sender: String,
-    type: MessageType,
-    content: String?,
-    chatRoom: ChatRoom,
+    @Column(nullable = false, length = 30)
+    val sender: String,
+
+    @Column(nullable = false, length = 5)
+    val type: MessageType,
+
+    @Column(nullable = true, length = 300)
+    val content: String?,
+
+    @JsonBackReference @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(foreignKey = ForeignKey(name = "fk_chatRoom_role_chatRoom_id"))
+    val chatRoom: ChatRoom,
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
-
-    @Column(nullable = false, length = 30)
-    val sender: String = sender
-
-    @Column(nullable = false, length = 5)
-    val type: MessageType = type
-
-    @Column(nullable = true, length = 300)
-    val content: String? = content
-
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(foreignKey = ForeignKey(name = "fk_chatRoom_role_chatRoom_id"))
-    val chatRoom: ChatRoom = chatRoom
 }

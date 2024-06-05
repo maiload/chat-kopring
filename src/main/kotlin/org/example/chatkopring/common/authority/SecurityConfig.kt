@@ -29,7 +29,7 @@ class SecurityConfig (
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .formLogin { it.disable() }
             .authorizeHttpRequests {
-                it.requestMatchers("/api/member/signup", "/api/member/login/**").anonymous()
+                it.requestMatchers("/api/member/signup", "/api/member/login/**", "api/member/reissue-token").anonymous()
                     .requestMatchers("/api/member/**").hasAnyRole("MEMBER", "OAUTH_MEMBER")
                     .anyRequest().permitAll()
             }

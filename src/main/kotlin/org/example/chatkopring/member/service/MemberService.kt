@@ -4,12 +4,15 @@ import jakarta.transaction.Transactional
 import org.example.chatkopring.common.authority.JwtTokenProvider
 import org.example.chatkopring.common.authority.TokenInfo
 import org.example.chatkopring.common.exception.InvalidInputException
+import org.example.chatkopring.common.exception.UnAuthorizationException
 import org.example.chatkopring.common.status.Role
 import org.example.chatkopring.member.dto.LoginDto
 import org.example.chatkopring.member.dto.MemberDto
 import org.example.chatkopring.member.dto.MemberResponse
+import org.example.chatkopring.member.entity.BlackList
 import org.example.chatkopring.member.entity.Member
 import org.example.chatkopring.member.entity.MemberRole
+import org.example.chatkopring.member.repository.BlackListRepository
 import org.example.chatkopring.member.repository.MemberRepository
 import org.example.chatkopring.member.repository.MemberRoleRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -24,6 +27,7 @@ import org.springframework.stereotype.Service
 class MemberService(
     private val memberRepository: MemberRepository,
     private val memberRoleRepository: MemberRoleRepository,
+    private val blackListRepository: BlackListRepository,
     private val authenticationManagerBuilder: AuthenticationManagerBuilder,
     private val jwtTokenProvider: JwtTokenProvider,
 ) {
@@ -48,6 +52,35 @@ class MemberService(
 
         return "회원가입이 완료되었습니다."
     }
+
+    /**
+     * refreshToken 검증
+     */
+    fun validateRefreshToken(refreshToken: String) {
+        require(jwtTokenProvider.validateToken(refreshToken)) { throw UnAuthorizationException("유효하지 않은 Refresh Token 입니다.") }
+        require(!blackListRepository.existsByInvalidRefreshToken(refreshToken)) { throw UnAuthorizationException("이미 로그아웃된 사용자입니다!") }
+    }
+
+
+    /**
+     * 로그아웃 -> blackList 등록
+     */
+    fun logout(loginId: String, refreshToken: String) {
+        validateRefreshToken(refreshToken)
+        if(jwtTokenProvider.getUserLoginId(refreshToken) != loginId) throw UnAuthorizationException(loginId, "로그인한 사용자의 Refresh Token이 아닙니다.")
+        blackListRepository.save(BlackList(refreshToken))
+    }
+
+    /**
+     * 토큰 검증 후 재발급
+     */
+    fun reissueToken(refreshToken: String): TokenInfo {
+        validateRefreshToken(refreshToken)
+        val authentication = jwtTokenProvider.getAuthentication(refreshToken)
+        blackListRepository.save(BlackList(refreshToken))
+        return jwtTokenProvider.createToken(authentication)
+    }
+
 
     /**
      * 로그인 -> 토큰 발행

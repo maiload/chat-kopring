@@ -50,6 +50,9 @@ class JwtTokenProvider {
 
         // Refresh Token
         val refreshToken = Jwts.builder()
+            .setSubject(authentication.name)
+            .claim("auth", authorities)
+            .claim("userId", (authentication.principal as CustomUser).userId)
             .setExpiration(refreshExpiration)
             .signWith(key, SignatureAlgorithm.HS256)
             .compact()
@@ -58,7 +61,7 @@ class JwtTokenProvider {
     }
 
     /**
-     * Token 정보 추출
+     * Authentication 생성
      */
     fun getAuthentication(token: String): Authentication {
         val claims: Claims = getClaims(token)
@@ -77,6 +80,11 @@ class JwtTokenProvider {
 
         return UsernamePasswordAuthenticationToken(principal, "", authorities)
     }
+
+    /**
+     * Token loginId 추출
+     */
+    fun getUserLoginId(token: String): String = getClaims(token).subject
 
     /**
      * Token 검증
