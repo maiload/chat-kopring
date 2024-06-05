@@ -9,7 +9,6 @@ data class ChatMessageDto(
     val receiver: String?,
     val roomId: String,
 ){
-
 }
 
 

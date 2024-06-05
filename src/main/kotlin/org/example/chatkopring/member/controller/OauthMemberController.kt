@@ -14,7 +14,6 @@ class OauthMemberController {
     // Google
     @GetMapping("/login/google")
     fun googleLogin(): String {
-        log.warn("구글 로그인")
         return "redirect:/oauth2/authorization/google"
     }
 }

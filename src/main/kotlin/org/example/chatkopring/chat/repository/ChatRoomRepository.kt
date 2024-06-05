@@ -1,6 +1,5 @@
 package org.example.chatkopring.chat.repository
 
-import org.example.chatkopring.chat.dto.ChatMessageDto
 import org.example.chatkopring.chat.dto.MessageType
 import org.example.chatkopring.chat.entity.ChatMessage
 import org.example.chatkopring.chat.entity.ChatRoom
@@ -10,7 +9,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
 interface ChatRoomRepository: JpaRepository<ChatRoom, String> {
-
+    fun existsByReceiverAndCreatorAndJoinNumberEquals(receiver: String, creator: String, joinNumber: Long): Boolean
 }
 
 interface ChatMessageRepository: JpaRepository<ChatMessage, Long> {

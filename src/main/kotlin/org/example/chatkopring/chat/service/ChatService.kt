@@ -8,6 +8,8 @@ import org.example.chatkopring.chat.entity.ChatMessage
 import org.example.chatkopring.chat.entity.ChatRoom
 import org.example.chatkopring.chat.repository.ChatMessageRepository
 import org.example.chatkopring.chat.repository.ChatRoomRepository
+import org.example.chatkopring.common.exception.UnAuthorizationException
+import org.example.chatkopring.util.logger
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 
@@ -17,6 +19,8 @@ class ChatService(
     val chatRoomRepository: ChatRoomRepository,
     val chatMessageRepository: ChatMessageRepository,
 ) {
+    val log = logger()
+
     fun createRoom(chatMessageDto: ChatMessageDto) {
         val chatRoom = ChatRoom(chatMessageDto.roomId, chatMessageDto.sender, 1, chatMessageDto.receiver!!)
         chatRoomRepository.save(chatRoom)
@@ -24,15 +28,30 @@ class ChatService(
         chatMessageRepository.save(chatMessage)
     }
 
+    fun isPrivateRoomExist(receiver: String, sender: String): Boolean =
+        chatRoomRepository.existsByReceiverAndCreatorAndJoinNumberEquals(receiver, sender, 2)
+                || chatRoomRepository.existsByReceiverAndCreatorAndJoinNumberEquals(sender, receiver, 2)
+
     fun sendMessage(chatMessageDto: ChatMessageDto) {
         val chatRoom = chatRoomRepository.findById(chatMessageDto.roomId).get()
+        val chatRoomDto = ChatRoomDto(chatRoom.id, chatMessageDto.sender, chatRoom.receiver)
+        require(validateChatRoom(chatRoomDto)) { throw UnAuthorizationException(message = "개인 채팅방에 메세지를 전송할 수 없습니다.") }
         val chatMessage = ChatMessage(chatMessageDto.sender, chatMessageDto.type, chatMessageDto.content, chatRoom)
         chatMessageRepository.save(chatMessage)
+    }
+
+    fun validateChatRoom(chatRoomDto: ChatRoomDto): Boolean {
+        val chatRoom = chatRoomRepository.findById(chatRoomDto.roomId).get()
+        val receiver = chatRoom.receiver
+        val creator = chatRoom.creator
+//        log.info("validate : $receiver, $creator, ${chatRoomDto.sender}")
+        return receiver == "ALL" || receiver == chatRoomDto.sender || creator == chatRoomDto.sender
     }
 
     // 처음 입장 or 퇴장했던 방 입장
     fun enterRoom(chatMessageDto: ChatMessageDto) {
         val chatRoom = chatRoomRepository.findById(chatMessageDto.roomId).get()
+        if (chatRoom.receiver != "ALL" && chatRoom.joinNumber == 2L) throw UnAuthorizationException(message = "private room 의 정원이 가득찼습니다.")
         chatRoom.joinNumber += 1
         chatRoomRepository.save(chatRoom)
         val chatMessage = ChatMessage(chatMessageDto.sender, chatMessageDto.type, chatMessageDto.content, chatRoom)

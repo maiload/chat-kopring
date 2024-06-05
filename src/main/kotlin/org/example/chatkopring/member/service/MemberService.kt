@@ -57,8 +57,8 @@ class MemberService(
      * refreshToken 검증
      */
     fun validateRefreshToken(refreshToken: String) {
-        require(jwtTokenProvider.validateToken(refreshToken)) { throw UnAuthorizationException("유효하지 않은 Refresh Token 입니다.") }
-        require(!blackListRepository.existsByInvalidRefreshToken(refreshToken)) { throw UnAuthorizationException("이미 로그아웃된 사용자입니다!") }
+        require(jwtTokenProvider.validateToken(refreshToken)) { throw UnAuthorizationException(message = "유효하지 않은 Refresh Token 입니다.") }
+        require(!blackListRepository.existsByInvalidRefreshToken(refreshToken)) { throw UnAuthorizationException(message = "이미 로그아웃된 사용자입니다!") }
     }
 
 
