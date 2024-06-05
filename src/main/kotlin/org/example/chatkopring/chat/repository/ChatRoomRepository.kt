@@ -1,6 +1,7 @@
 package org.example.chatkopring.chat.repository
 
 import org.example.chatkopring.chat.dto.MessageType
+import org.example.chatkopring.chat.entity.ChatImage
 import org.example.chatkopring.chat.entity.ChatMessage
 import org.example.chatkopring.chat.entity.ChatRoom
 import org.springframework.data.domain.Pageable
@@ -18,5 +19,9 @@ interface ChatMessageRepository: JpaRepository<ChatMessage, Long> {
 
     @Query("SELECT cm FROM ChatMessage cm WHERE cm.chatRoom.id = :roomId AND cm.id >= :id ORDER BY cm.id DESC")
     fun findByRoomIdAndMessageIdGreaterThanEqual(@Param("roomId") roomId: String, @Param("id") id: Long, pageable: Pageable): List<ChatMessage>
+}
+
+interface ChatImageRepository: JpaRepository<ChatImage, Long> {
+    fun findByChatMessage(chatMessage: ChatMessage): ChatImage
 }
 

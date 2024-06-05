@@ -5,5 +5,6 @@ enum class MessageType {
     CREATE,
     JOIN,
     CHAT,
+    IMAGE,
     LEAVE,
 }

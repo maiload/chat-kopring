@@ -2,6 +2,7 @@ package org.example.chatkopring.chat.controller
 
 import org.example.chatkopring.chat.config.UserSessionRegistry
 import org.example.chatkopring.chat.dto.ChatMessageDto
+import org.example.chatkopring.chat.dto.ChatMessageResponse
 import org.example.chatkopring.chat.dto.ChatRoomDto
 import org.example.chatkopring.chat.dto.MessageType
 import org.example.chatkopring.chat.entity.ChatMessage
@@ -54,7 +55,7 @@ class ChatController(
     fun enterRoom(@Payload chatRoomDto: ChatRoomDto, headerAccessor: SimpMessageHeaderAccessor) {
         require(chatService.validateChatRoom(chatRoomDto)) { throw UnAuthorizationException(chatRoomDto.roomId, "개인 채팅방에 입장할 수 없습니다.") }
         log.info("${chatRoomDto.sender} joined the room (${chatRoomDto.roomId})")
-        val chatMessageDto = ChatMessageDto(MessageType.JOIN, null, chatRoomDto.sender, chatRoomDto.receiver, chatRoomDto.roomId)
+        val chatMessageDto = ChatMessageDto(MessageType.JOIN, null, null, chatRoomDto.sender, chatRoomDto.receiver, chatRoomDto.roomId)
         chatService.enterRoom(chatMessageDto)
         messagingTemplate.convertAndSend("/sub/chat/${chatRoomDto.roomId}", chatMessageDto)
     }
@@ -63,14 +64,14 @@ class ChatController(
     fun leaveRoom(@Payload chatRoomDto: ChatRoomDto) {
         require(chatService.validateChatRoom(chatRoomDto)) { throw UnAuthorizationException(chatRoomDto.roomId, "개인 채팅방에 접근할 수 없습니다.") }
         log.info("${chatRoomDto.sender} leaved the room (${chatRoomDto.roomId})")
-        val chatMessageDto = ChatMessageDto(MessageType.LEAVE, null, chatRoomDto.sender, chatRoomDto.receiver, chatRoomDto.roomId)
+        val chatMessageDto = ChatMessageDto(MessageType.LEAVE, null, null, chatRoomDto.sender, chatRoomDto.receiver, chatRoomDto.roomId)
         chatService.leaveRoom(chatMessageDto)
         messagingTemplate.convertAndSend("/sub/chat/${chatRoomDto.roomId}", chatMessageDto)
     }
 
     @ResponseBody
     @GetMapping("/chat/history")
-    fun requestHistory(@RequestParam roomId: String, @RequestParam loginId: String): List<ChatMessage> =
+    fun requestHistory(@RequestParam roomId: String, @RequestParam loginId: String): List<ChatMessageResponse> =
         chatService.activeRoom(roomId, loginId)
 
     @MessageMapping("/chat/createRoom")
@@ -83,7 +84,7 @@ class ChatController(
             }
             else -> determineMessageType(sender, receiver, roomId)
         }
-        val chatMessageDto = ChatMessageDto(messageType, null, sender, receiver, roomId)
+        val chatMessageDto = ChatMessageDto(messageType, null, null, sender, receiver, roomId)
         messagingTemplate.convertAndSend("/sub/chat/$receiver", chatMessageDto)
     }
 
@@ -93,7 +94,7 @@ class ChatController(
             MessageType.ACTIVE
         } else {
             log.info("$sender invited $receiver to the chat room.")
-            chatService.createRoom(ChatMessageDto(MessageType.CREATE, null, sender, receiver, roomId))
+            chatService.createRoom(ChatMessageDto(MessageType.CREATE, null, null, sender, receiver, roomId))
             MessageType.CREATE
         }
     }

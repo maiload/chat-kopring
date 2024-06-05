@@ -1,17 +1,10 @@
 package org.example.chatkopring.chat.entity
 
 import com.fasterxml.jackson.annotation.JsonBackReference
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.ForeignKey
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
-import jakarta.persistence.Table
+import com.fasterxml.jackson.annotation.JsonManagedReference
+import jakarta.persistence.*
 import net.minidev.json.annotate.JsonIgnore
+import org.example.chatkopring.chat.dto.ChatMessageResponse
 import org.example.chatkopring.chat.dto.MessageType
 
 @Entity
@@ -24,12 +17,23 @@ class ChatMessage(
     val type: MessageType,
 
     @Column(nullable = true, length = 300)
-    val content: String?,
+    val content: String?,       // 이미지 -> 파일명
 
-    @JsonBackReference @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(foreignKey = ForeignKey(name = "fk_chatRoom_role_chatRoom_id"))
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(foreignKey = ForeignKey(name = "fk_chatRoom_role_chatRoom_id"))
     val chatRoom: ChatRoom,
+
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
+
+    @JsonManagedReference
+    @Column(nullable = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "chatMessage", cascade = [CascadeType.ALL])
+    val images: List<ChatImage>? = null
+
+    fun toChatMessageResponse(base64Image: String?): ChatMessageResponse =
+        ChatMessageResponse(id!!, type, sender, content, base64Image)
 }
