@@ -1,3 +1,4 @@
 GET http://localhost:8080/chat/history?
     roomId=1&
     loginId=jin
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImlhdCI6MTcxNzY4NDYzNywiZXhwIjoxNzE3Njg2NDM3fQ.KVk6_95s7mbF9DgWqYRZH1OvM1igO9Y1yrb-UCifyY4

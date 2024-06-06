@@ -1,33 +1,30 @@
 package org.example.chatkopring.chat.service
 
 import jakarta.transaction.Transactional
-import org.example.chatkopring.chat.dto.ChatMessageDto
-import org.example.chatkopring.chat.dto.ChatMessageResponse
-import org.example.chatkopring.chat.dto.ChatRoomDto
-import org.example.chatkopring.chat.dto.MessageType
+import org.example.chatkopring.chat.dto.*
 import org.example.chatkopring.chat.entity.ChatImage
 import org.example.chatkopring.chat.entity.ChatMessage
 import org.example.chatkopring.chat.entity.ChatRoom
 import org.example.chatkopring.chat.repository.ChatImageRepository
 import org.example.chatkopring.chat.repository.ChatMessageRepository
 import org.example.chatkopring.chat.repository.ChatRoomRepository
-import org.example.chatkopring.common.exception.UnAuthorizationException
 import org.example.chatkopring.util.logger
 import org.springframework.data.domain.PageRequest
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
-import javax.imageio.ImageIO
 
 const val OUTPUT_PATH: String = "src/main/resources/images/"
 
 @Transactional
 @Service
 class ChatService(
-    val chatRoomRepository: ChatRoomRepository,
-    val chatMessageRepository: ChatMessageRepository,
-    val chatImageRepository: ChatImageRepository,
+    private val chatRoomRepository: ChatRoomRepository,
+    private val chatMessageRepository: ChatMessageRepository,
+    private val chatImageRepository: ChatImageRepository,
+    private val messagingTemplate: SimpMessagingTemplate,
 ) {
     val log = logger()
 
@@ -38,23 +35,35 @@ class ChatService(
         chatMessageRepository.save(chatMessage)
     }
 
-    fun isPrivateRoomExist(receiver: String, sender: String): Boolean =
-        chatRoomRepository.existsByReceiverAndCreatorAndJoinNumberEquals(receiver, sender, 2)
-                || chatRoomRepository.existsByReceiverAndCreatorAndJoinNumberEquals(sender, receiver, 2)
+    fun isPrivateRoomExist(receiver: String, creator: String): Boolean =
+        chatRoomRepository.existsByReceiverAndCreatorAndJoinNumberGreaterThanEqual(receiver, creator, 1)
+                || chatRoomRepository.existsByReceiverAndCreatorAndJoinNumberGreaterThanEqual(creator, receiver, 1)
 
-    fun sendMessage(chatMessageDto: ChatMessageDto) {
-        val chatRoom = chatRoomRepository.findById(chatMessageDto.roomId).get()
-        val chatRoomDto = ChatRoomDto(chatRoom.id, chatMessageDto.sender, chatRoom.receiver)
-        require(validateChatRoom(chatRoomDto)) { throw UnAuthorizationException(message = "개인 채팅방에 메세지를 전송할 수 없습니다.") }
-        val chatMessage = ChatMessage(chatMessageDto.sender, chatMessageDto.type, chatMessageDto.content, chatRoom)
-        if (chatMessageDto.type == MessageType.IMAGE){
-            val originFilename = chatMessageDto.content ?: "unnamed.jpg"
-            val storageFilename = originFilename.generateStorageFileName()
-            val chatImage = ChatImage(originFilename, storageFilename, chatMessage)
-            saveBase64Image(chatMessageDto.image!!, OUTPUT_PATH + storageFilename)
-            chatImageRepository.save(chatImage)
+    fun getLastChatMessage(roomId: String, sender: String) =
+        chatMessageRepository.findFirstByRoomIdOrderByIdDesc(roomId, sender, PageRequest.of(0,1))
+
+    fun sendMessage(chatMessageDto: ChatMessageDto, chatRoom: ChatRoom) {
+        if(!validateEnterHistory(chatMessageDto)){
+            sendErrorMessage(
+                ErrorMessage(
+                    "입장중인 방이 아닙니다.",
+                    chatMessageDto.sender,
+                    chatMessageDto.receiver,
+                    chatMessageDto.roomId
+                )
+            )
+        }else{
+            val chatMessage = ChatMessage(chatMessageDto.sender, chatMessageDto.type, chatMessageDto.content, chatRoom)
+            if (chatMessageDto.type == MessageType.IMAGE){
+                val originFilename = chatMessageDto.content ?: "unnamed.jpg"
+                val storageFilename = originFilename.generateStorageFileName()
+                val chatImage = ChatImage(originFilename, storageFilename, chatMessage)
+                saveBase64Image(chatMessageDto.image!!, OUTPUT_PATH + storageFilename)
+                chatImageRepository.save(chatImage)
+            }
+            chatMessageRepository.save(chatMessage)
+            messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
         }
-        chatMessageRepository.save(chatMessage)
     }
 
     fun saveBase64Image(base64Image: String, outputPath: String) {
@@ -73,29 +82,80 @@ class ChatService(
         return receiver == "ALL" || receiver == chatRoomDto.sender || creator == chatRoomDto.sender
     }
 
-    // 처음 입장 or 퇴장했던 방 입장
     fun enterRoom(chatMessageDto: ChatMessageDto) {
         val chatRoom = chatRoomRepository.findById(chatMessageDto.roomId).get()
-        if (chatRoom.receiver != "ALL" && chatRoom.joinNumber == 2L) throw UnAuthorizationException(message = "private room 의 정원이 가득찼습니다.")
+        if(chatMessageDto.sender in listOf(chatRoom.receiver, chatRoom.creator)){
+            if(chatRoom.joinNumber == 2L){
+                // 개인 -> 활성화
+                activeRoom(chatMessageDto)
+            }else{
+                val lastChatMessage = getLastChatMessage(chatMessageDto.roomId, chatMessageDto.sender)?.firstOrNull()
+                if(chatRoom.joinNumber == 1L && chatMessageDto.sender == chatRoom.creator){
+                    if(lastChatMessage?.type == MessageType.LEAVE) {
+                        // 본인방 퇴장 후 재입장 -> 입장
+                        canEnterRoom(chatMessageDto, chatRoom)
+                        messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
+                    }else{
+                        // 본인방 재입장 -> 활성화
+                        activeRoom(chatMessageDto)
+                    }
+                }else{
+                    // 개인 -> 입장
+                    canEnterRoom(chatMessageDto, chatRoom)
+                    messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
+                }
+            }
+        }else{
+            if(validateEnterHistory(chatMessageDto)){
+                // 전체 -> 활성화
+                activeRoom(chatMessageDto)
+            }else{
+                // 전체 -> 입장
+                canEnterRoom(chatMessageDto, chatRoom)
+                messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
+            }
+        }
+    }
+
+    fun activeRoom(chatMessageDto: ChatMessageDto) {
+        chatMessageDto.type = MessageType.ACTIVE
+        messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
+    }
+
+    fun canEnterRoom(chatMessageDto: ChatMessageDto, chatRoom: ChatRoom) {
         chatRoom.joinNumber += 1
         chatRoomRepository.save(chatRoom)
         val chatMessage = ChatMessage(chatMessageDto.sender, chatMessageDto.type, chatMessageDto.content, chatRoom)
         chatMessageRepository.save(chatMessage)
     }
 
-    // 처음 입장 or 퇴장했던 방 입장
+
+    // 퇴장
     fun leaveRoom(chatMessageDto: ChatMessageDto) {
-        val chatRoom = chatRoomRepository.findById(chatMessageDto.roomId).get()
-        chatRoom.joinNumber -= 1
-        chatRoomRepository.save(chatRoom)
-        val chatMessage = ChatMessage(chatMessageDto.sender, chatMessageDto.type, chatMessageDto.content, chatRoom)
-        chatMessageRepository.save(chatMessage)
+        if(!validateEnterHistory(chatMessageDto)){
+            sendErrorMessage(
+                ErrorMessage(
+                    "입장중인 방이 아닙니다.",
+                    chatMessageDto.sender,
+                    chatMessageDto.receiver,
+                    chatMessageDto.roomId
+                )
+            )
+        }else{
+            val chatRoom = chatRoomRepository.findById(chatMessageDto.roomId).get()
+            chatRoom.joinNumber -= 1
+            chatRoomRepository.save(chatRoom)
+            val chatMessage = ChatMessage(chatMessageDto.sender, chatMessageDto.type, chatMessageDto.content, chatRoom)
+            chatMessageRepository.save(chatMessage)
+            messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
+        }
     }
 
     // 입장 중인 방 다시 입장
     fun activeRoom(roomId: String, sender: String): List<ChatMessageResponse> {
+        val lastJoinChatMessage = chatMessageRepository.findFirstByRoomIdAndTypeOrderByIdDesc(roomId, MessageType.JOIN, sender, PageRequest.of(0, 1))?.firstOrNull()
         // 마지막 입장 기록이 없다면 방 생성자
-        val lastJoinHistoryId = chatMessageRepository.findFirstByRoomIdAndTypeOrderByIdDesc(roomId, MessageType.JOIN, sender)?.id ?: 1
+        val lastJoinHistoryId = lastJoinChatMessage?.id ?: 1
         // 최근 히스토리 기준으로 100개까지만 로드
         return chatMessageRepository.findByRoomIdAndMessageIdGreaterThanEqual(roomId, lastJoinHistoryId, PageRequest.of(0, 100))
             .map {
@@ -107,6 +167,26 @@ class ChatService(
                 it.toChatMessageResponse(base64Image)
             }
     }
+
+    fun validateEnterHistory(chatMessageDto: ChatMessageDto): Boolean {
+        val lastChatMessage = chatMessageRepository.findFirstByRoomIdOrderByIdDesc(chatMessageDto.roomId, chatMessageDto.sender,
+            PageRequest.of(0, 1))?.firstOrNull() ?: return false
+        return lastChatMessage.type !in listOf(MessageType.LEAVE)
+//        return when (chatMessageDto.type) {
+//            MessageType.JOIN, -> lastChatMessage.type != MessageType.LEAVE
+//            MessageType.LEAVE -> lastChatMessage.type in listOf(MessageType.LEAVE, MessageType.CREATE)
+//            MessageType.CHAT, MessageType.IMAGE -> lastChatMessage.type !in listOf(MessageType.LEAVE, MessageType.CREATE)
+//            else -> false
+//        }
+    }
+
+    fun validateEnterHistory(roomId: String, sender: String): Boolean {
+        val lastChatMessage = chatMessageRepository.findFirstByRoomIdOrderByIdDesc(roomId, sender,
+            PageRequest.of(0, 1))?.firstOrNull() ?: return false
+        return lastChatMessage.type !in listOf(MessageType.LEAVE, MessageType.CREATE)
+    }
+
+    fun getChatRoomById(roomId: String) = chatRoomRepository.findById(roomId)
 
     fun String.generateStorageFileName(): String {
         val currentTimeMillisString = System.currentTimeMillis().toString()
@@ -122,6 +202,13 @@ class ChatService(
             val bytes = inputStream.readBytes()
 
             return Base64.getEncoder().encodeToString(bytes)
+        }
+    }
+
+    fun sendErrorMessage(errorMessage: ErrorMessage?) {
+        log.error("WebSocketError : $errorMessage")
+        if (errorMessage != null) {
+            messagingTemplate.convertAndSend("/sub/chat/${errorMessage.roomId}", errorMessage)
         }
     }
 

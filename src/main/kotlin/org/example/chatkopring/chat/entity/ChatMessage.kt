@@ -14,6 +14,7 @@ class ChatMessage(
     val sender: String,
 
     @Column(nullable = false, length = 5)
+    @Enumerated(EnumType.STRING)
     val type: MessageType,
 
     @Column(nullable = true, length = 300)
@@ -35,5 +36,5 @@ class ChatMessage(
     val images: List<ChatImage>? = null
 
     fun toChatMessageResponse(base64Image: String?): ChatMessageResponse =
-        ChatMessageResponse(id!!, type, sender, content, base64Image)
+        ChatMessageResponse(id!!, type.name, sender, content, base64Image)
 }

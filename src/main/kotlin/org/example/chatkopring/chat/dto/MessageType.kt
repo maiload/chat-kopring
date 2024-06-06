@@ -7,4 +7,5 @@ enum class MessageType {
     CHAT,
     IMAGE,
     LEAVE,
+    ERROR,
 }

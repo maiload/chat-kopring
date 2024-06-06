@@ -1,15 +1,24 @@
 package org.example.chatkopring.chat.dto
 
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import org.example.chatkopring.chat.entity.ChatRoom
 
 data class ChatMessageDto(
-    val type: MessageType,
+    @field:NotNull
+    var type: MessageType,
     val content: String?,
     val image: String?,
+
+    @field:NotBlank
     val sender: String,
     val receiver: String?,
+
+    @field:NotBlank
     val roomId: String,
 ){
+    fun toErrorMessage(message: String) = ErrorMessage(message, sender, receiver, roomId)
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

@@ -8,7 +8,7 @@ Refresh: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2
 
 ### Reissue
 GET http://localhost:8080/api/member/reissue-token
-Refresh: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImV4cCI6MTcxNzY2ODMxMX0.S1PWKmu73FFMyf5F-s-U9ex0FSEqbmYfXLN6hty5qFI
+Refresh: yJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImV4cCI6MTcxNzc2NTk0MH0.LvEPzYmD-if0FSbNxmLM4ZQkgAWliEmH--Tcu0kWPGE
 
 ### Sign up
 POST http://localhost:8080/api/member/signup
@@ -35,13 +35,13 @@ Content-Type: application/json
 ### info
 
 GET http://localhost:8080/api/member/info
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImlhdCI6MTcxNzU1ODkxNywiZXhwIjoxNzE3NTYwNzE3fQ.ZkziedpPelaRs8s6MKn1yMRUSEGJVE8QMw8TNBcpbCM
+Authorization: Bearer yJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImlhdCI6MTcxNzY1NjIzMCwiZXhwIjoxNzE3NjU4MDMwfQ.VqE5jLPeNgRSOU1ba_e93CczrfiPyXXrqyvGvqhbOfc
 
 ### info update
 
 PUT http://localhost:8080/api/member/info
 Content-Type: application/json
-Authorization: Bearer
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImlhdCI6MTcxNzY1NjIzMCwiZXhwIjoxNzE3NjU4MDMwfQ.VqE5jLPeNgRSOU1ba_e93CczrfiPyXXrqyvGvqhbOfc
 
 {
   "id": 1,
@@ -56,7 +56,7 @@ Authorization: Bearer
 //{
 //  "id": 1,
 //  "loginId": "jin",
-//  "password": "qwer123!",
+//  "password": "qwer123!1",
 //  "name": "이정진",
 //  "birthDate": "2000-10-24",
 //  "gender": "MAN",

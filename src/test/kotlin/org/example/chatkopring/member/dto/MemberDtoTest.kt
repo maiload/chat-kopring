@@ -54,7 +54,7 @@ class MemberDtoTest {
 
     @DisplayName("영문, 숫자, 특수문자를 포함한 8~20자리가 아니면 에러가 발생한다")
     @ParameterizedTest
-    @ValueSource(strings = ["12345678", "abcdefgh", "123456789012345678901", "qwer1234"])
+    @ValueSource(strings = ["12345678", "abcdefgh", "123456789asd!345678901", "qwer1234"])
     fun passwordTest(password: String) {
         val memberDto = MemberDto(
             id = null,

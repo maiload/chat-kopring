@@ -30,7 +30,7 @@ class SecurityConfig (
             .formLogin { it.disable() }
             .authorizeHttpRequests {
                 it.requestMatchers("/api/member/signup", "/api/member/login/**", "api/member/reissue-token").anonymous()
-                    .requestMatchers("/api/member/**").hasAnyRole("MEMBER", "OAUTH_MEMBER")
+                    .requestMatchers("/api/member/**", "/chat/history").hasAnyRole("MEMBER", "OAUTH_MEMBER")
                     .anyRequest().permitAll()
             }
             .addFilter(corsFilter())

@@ -32,7 +32,7 @@ class CustomExceptionHandler {
     }
 
     @ExceptionHandler(BadCredentialsException::class)
-    protected fun badCredentialsException(ex: Exception): ResponseEntity<BaseResponse<Map<String, String>>> {
+    protected fun badCredentialsException(ex: BadCredentialsException): ResponseEntity<BaseResponse<Map<String, String>>> {
         val errors = mapOf("로그인 실패" to "아이디 혹은 비밀번호를 다시 확인하세요.")
         return ResponseEntity(BaseResponse(ResultCode.ERROR.name, errors, ResultCode.ERROR.msg), HttpStatus.BAD_REQUEST)
     }
