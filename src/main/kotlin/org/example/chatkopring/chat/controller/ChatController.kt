@@ -80,6 +80,7 @@ class ChatController(
         val messageType = when (receiver) {
             "ALL" -> {
                 log.info("$sender created a public chat room.")
+                chatService.createRoom(ChatMessageDto(MessageType.CREATE, null, null, sender, receiver, roomId))
                 MessageType.CREATE
             }
             else -> determineMessageType(sender, receiver, roomId)

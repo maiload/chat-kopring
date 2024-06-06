@@ -22,8 +22,9 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.security:spring-security-messaging:6.2.4")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client:3.3.0")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     runtimeOnly("com.mysql:mysql-connector-j")
 
     implementation("io.jsonwebtoken:jjwt-api:0.12.5")
