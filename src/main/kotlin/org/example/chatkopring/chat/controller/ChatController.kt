@@ -117,16 +117,27 @@ class ChatController(
     fun createRoom(@Payload chatRoomDto: ChatRoomDto, headerAccessor: SimpMessageHeaderAccessor) {
         require(messageValueValidate(chatRoomDto, MessageType.CREATE))
         val (roomId, creator, receiver) = chatRoomDto
-        val messageType = when (receiver) {
-            "ALL" -> {
-                log.info("$creator created a public chat room.")
-                chatService.createRoom(ChatMessageDto(MessageType.CREATE, null, null, creator, receiver, roomId))
-                MessageType.CREATE
+        if(creator == receiver) {
+            sendErrorMessage(
+                ErrorMessage(
+                    "creator 와 receiver 가 동일합니다.",
+                    chatRoomDto.sender,
+                    chatRoomDto.receiver,
+                    chatRoomDto.roomId
+                )
+            )
+        }else{
+            val messageType = when (receiver) {
+                "ALL" -> {
+                    log.info("$creator created a public chat room.")
+                    chatService.createRoom(ChatMessageDto(MessageType.CREATE, null, null, creator, receiver, roomId))
+                    MessageType.CREATE
+                }
+                else -> determineMessageType(creator, receiver, roomId)
             }
-            else -> determineMessageType(creator, receiver, roomId)
+            val chatMessageDto = ChatMessageDto(messageType, null, null, creator, receiver, roomId)
+            messagingTemplate.convertAndSend("/sub/chat/$roomId", chatMessageDto)
         }
-        val chatMessageDto = ChatMessageDto(messageType, null, null, creator, receiver, roomId)
-        messagingTemplate.convertAndSend("/sub/chat/$roomId", chatMessageDto)
     }
 
     private fun determineMessageType(creator: String, receiver: String, roomId: String): MessageType {
