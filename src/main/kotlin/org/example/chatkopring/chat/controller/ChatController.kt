@@ -79,7 +79,6 @@ class ChatController(
                 )
             )
         } else{
-            log.info("${chatRoomDto.sender} joined the room (${chatRoomDto.roomId})")
             val chatMessageDto = ChatMessageDto(MessageType.JOIN, null, null, chatRoomDto.sender, chatRoomDto.receiver, chatRoomDto.roomId)
             chatService.enterRoom(chatMessageDto)
         }
@@ -127,34 +126,31 @@ class ChatController(
                 )
             )
         }else{
-            val messageType = when (receiver) {
+            when (receiver) {
                 "ALL" -> {
                     log.info("$creator created a public chat room.")
                     chatService.createRoom(ChatMessageDto(MessageType.CREATE, null, null, creator, receiver, roomId))
-                    MessageType.CREATE
                 }
                 else -> determineMessageType(creator, receiver, roomId)
             }
-            val chatMessageDto = ChatMessageDto(messageType, null, null, creator, receiver, roomId)
-            messagingTemplate.convertAndSend("/sub/chat/$roomId", chatMessageDto)
         }
     }
 
-    private fun determineMessageType(creator: String, receiver: String, roomId: String): MessageType {
-        return if (chatService.isPrivateRoomExist(receiver, creator)) {
+    private fun determineMessageType(creator: String, receiver: String, roomId: String) {
+        if (chatService.isPrivateRoomExist(receiver, creator)) {
             log.info("Already private room existed ($creator & $receiver)")
             val lastChatMessage = chatService.getLastChatMessage(roomId, creator)?.firstOrNull()
+
             if(lastChatMessage?.type == null || lastChatMessage.type == MessageType.LEAVE){
                 chatService.canEnterRoom(ChatMessageDto(MessageType.JOIN, null, null, creator, receiver, roomId),
                     ChatRoom(roomId, creator, 1, receiver))
-                MessageType.JOIN
             }else{
-                MessageType.ACTIVE
+                val chatMessageDto = ChatMessageDto(MessageType.ACTIVE, null, null, creator, receiver, roomId)
+                messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
             }
         } else {
             log.info("$creator invited $receiver to the chat room.")
             chatService.createRoom(ChatMessageDto(MessageType.CREATE, null, null, creator, receiver, roomId))
-            MessageType.CREATE
         }
     }
 

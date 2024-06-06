@@ -33,6 +33,11 @@ class ChatService(
         chatRoomRepository.save(chatRoom)
         val chatMessage = ChatMessage(chatMessageDto.sender, chatMessageDto.type, chatMessageDto.content, chatRoom)
         chatMessageRepository.save(chatMessage)
+        messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
+        if (chatMessageDto.receiver != "ALL") {
+            // 개인 채팅 -> 강제 JOIN
+            enterRoom(ChatMessageDto(MessageType.JOIN, null, null, chatMessageDto.receiver, chatMessageDto.sender, chatMessageDto.roomId))
+        }
     }
 
     fun isPrivateRoomExist(receiver: String, creator: String): Boolean =
@@ -127,6 +132,7 @@ class ChatService(
         chatRoomRepository.save(chatRoom)
         val chatMessage = ChatMessage(chatMessageDto.sender, chatMessageDto.type, chatMessageDto.content, chatRoom)
         chatMessageRepository.save(chatMessage)
+        log.info("${chatMessageDto.sender} joined the room (${chatMessageDto.roomId})")
     }
 
 
