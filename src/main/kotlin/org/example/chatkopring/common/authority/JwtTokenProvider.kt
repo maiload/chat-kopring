@@ -35,8 +35,8 @@ class JwtTokenProvider {
             .joinToString(",") { it.authority }
 
         val now = Date()
-        val accessExpiration = Date(now.time + EXPIRATION_MILLISECONDS)     // 30분
-        val refreshExpiration = Date(now.time + EXPIRATION_MILLISECONDS * 60)   // 30시간
+        val accessExpiration = Date(now.time + EXPIRATION_MILLISECONDS)     // 1시간
+        val refreshExpiration = Date(now.time + EXPIRATION_MILLISECONDS * 48)   // 48시간
 
         // Access Token
         val accessToken = Jwts.builder()

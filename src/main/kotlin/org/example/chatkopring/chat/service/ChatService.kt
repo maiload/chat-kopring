@@ -61,6 +61,7 @@ class ChatService(
             )
         }else{
             val chatMessage = ChatMessage(chatMessageDto.sender, chatMessageDto.type, chatMessageDto.content, chatRoom)
+            // 이미지 처리
             if (chatMessageDto.type == MessageType.IMAGE){
                 val originFilename = chatMessageDto.content ?: "unnamed.jpg"
                 val storageFilename = originFilename.generateStorageFileName()
@@ -68,12 +69,12 @@ class ChatService(
                 saveBase64Image(chatMessageDto.image!!, OUTPUT_PATH + storageFilename)
                 chatImageRepository.save(chatImage)
             }
+
             chatMessageRepository.save(chatMessage)
             messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
 
             // 개인 채팅방 상대 나가면 public 알림 X
             if(!isReceiverLeaveTheRoom(chatMessageDto.roomId)){
-                // TODO : 오픈 채팅방일 떄 public 알람 처리 여부
                 messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(chatMessageDto.type, chatMessageDto.sender, chatMessageDto.roomId))
             }
             log.info("${chatMessageDto.sender} sent message to room (${chatMessageDto.roomId})")
@@ -81,8 +82,9 @@ class ChatService(
     }
 
     fun isReceiverLeaveTheRoom(roomId: String): Boolean {
-        val joinNumber = getChatRoomById(roomId)?.joinNumber
-        return joinNumber == 1L
+        // 오픈 채팅방은 public 알림 제외
+        val chatRoom = getChatRoomById(roomId)
+        return chatRoom?.receiver == "ALL" || chatRoom?.joinNumber == 1L
     }
 
     fun saveBase64Image(base64Image: String, outputPath: String) {
