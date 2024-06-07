@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.socket.messaging.SessionConnectEvent
 import org.springframework.web.socket.messaging.SessionDisconnectEvent
+import org.springframework.web.socket.messaging.SessionUnsubscribeEvent
 
 @Controller
 class ChatController(
@@ -32,24 +33,39 @@ class ChatController(
 
     @EventListener
     fun handleWebSocketConnectListener(event: SessionConnectEvent) {
-        val sessionId = StompHeaderAccessor.wrap(event.message).sessionId!!
-        log.info("New Connection : $sessionId")
-        userSessionRegistry.registerSession(sessionId)
+        val user = StompHeaderAccessor.wrap(event.message).user
+        log.info("New Connection : $user")
+        if(user != null) {
+            userSessionRegistry.registerSession(user.name)
+            messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.CONNECT, user.name, null))
+        }
     }
 
     @EventListener
     fun handleWebSocketDisconnectListener(event: SessionDisconnectEvent) {
-        val sessionId = StompHeaderAccessor.wrap(event.message).sessionId!!
-        log.info("User Disconnected : $sessionId")
-        userSessionRegistry.removeSession(sessionId)
+        val user = StompHeaderAccessor.wrap(event.message).user
+        log.info("User Disconnected : $user")
+        if(user != null) {
+            userSessionRegistry.removeSession(user.name)
+            messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.DISCONNECT, user.name, null))
+        }
     }
 
+    @EventListener
+    fun handleWebSocketUnsubscribeListener(event: SessionUnsubscribeEvent) {
+        val user = StompHeaderAccessor.wrap(event.message).user
+        log.info("User Unsubscribed : $user")
+        if(user != null) {
+            messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.INACTIVE, user.name, null))
+        }
+    }
 
 
     @MessageMapping("/chat/sendMessage")
     fun sendMessage(@Payload chatMessageDto: ChatMessageDto) {
         require(messageValueValidate(chatMessageDto, MessageType.CHAT))
-        val chatRoom = chatService.getChatRoomById(chatMessageDto.roomId).get()
+        val chatRoom = chatService.getChatRoomById(chatMessageDto.roomId)
+        requireNotNull(chatRoom)
         val chatRoomDto = ChatRoomDto(chatRoom.id, chatMessageDto.sender, chatRoom.receiver)
         if(!chatService.validateChatRoom(chatRoomDto)) {
             sendErrorMessage(
@@ -62,7 +78,6 @@ class ChatController(
             )
         } else{
             chatService.sendMessage(chatMessageDto, chatRoom)
-            log.info("${chatMessageDto.sender} sent message to room (${chatMessageDto.roomId})")
         }
     }
 
@@ -97,7 +112,6 @@ class ChatController(
                 )
             )
         } else{
-            log.info("${chatRoomDto.sender} leaved the room (${chatRoomDto.roomId})")
             val chatMessageDto = ChatMessageDto(MessageType.LEAVE, null, null, chatRoomDto.sender, chatRoomDto.receiver, chatRoomDto.roomId)
             chatService.leaveRoom(chatMessageDto)
         }
@@ -107,7 +121,7 @@ class ChatController(
     @GetMapping("/chat/history")
     fun requestHistory(@RequestParam roomId: String, @RequestParam loginId: String) =
         if(chatService.validateEnterHistory(roomId, loginId)) {
-            ResponseEntity(BaseResponse(data = chatService.activeRoom(roomId, loginId)), HttpStatus.OK)
+            ResponseEntity(BaseResponse(data = chatService.getRoomHistory(roomId, loginId)), HttpStatus.OK)
         } else {
             ResponseEntity(BaseResponse(ResultCode.ERROR.name, "입장중인 방이 아닙니다.", ResultCode.ERROR.msg), HttpStatus.BAD_REQUEST)
         }
@@ -139,15 +153,17 @@ class ChatController(
     private fun determineMessageType(creator: String, receiver: String, roomId: String) {
         if (chatService.isPrivateRoomExist(receiver, creator)) {
             log.info("Already private room existed ($creator & $receiver)")
-            val lastChatMessage = chatService.getLastChatMessage(roomId, creator)?.firstOrNull()
+            val lastChatMessage = chatService.getLastChatMessage(roomId, creator)
 
             if(lastChatMessage?.type == null || lastChatMessage.type == MessageType.LEAVE){
                 chatService.canEnterRoom(ChatMessageDto(MessageType.JOIN, null, null, creator, receiver, roomId),
                     ChatRoom(roomId, creator, 1, receiver))
-            }else{
-                val chatMessageDto = ChatMessageDto(MessageType.ACTIVE, null, null, creator, receiver, roomId)
-                messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
             }
+            chatService.activeRoom(creator, roomId)
+//            else{
+//                val chatMessageDto = ChatMessageDto(MessageType.ACTIVE, null, null, creator, receiver, roomId)
+//                messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
+//            }
         } else {
             log.info("$creator invited $receiver to the chat room.")
             chatService.createRoom(ChatMessageDto(MessageType.CREATE, null, null, creator, receiver, roomId))
