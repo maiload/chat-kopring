@@ -4,6 +4,8 @@ import jakarta.validation.Valid
 import org.example.chatkopring.common.authority.TokenInfo
 import org.example.chatkopring.common.dto.BaseResponse
 import org.example.chatkopring.common.dto.CustomUser
+import org.example.chatkopring.common.exception.InvalidInputException
+import org.example.chatkopring.common.status.Role
 import org.example.chatkopring.member.dto.LoginDto
 import org.example.chatkopring.member.dto.MemberDto
 import org.example.chatkopring.member.dto.MemberResponse
@@ -39,7 +41,7 @@ class MemberController (
     }
 
     /**
-     * 회원가입
+     * 일반 회원가입
      */
     @PostMapping("/signup")
     fun signUp(@RequestBody @Valid memberDto: MemberDto): BaseResponse<Unit> {
@@ -48,12 +50,22 @@ class MemberController (
     }
 
     /**
+     * 기업 회원가입
+     */
+    @PostMapping("/signup/admin")
+    fun adminSignUp(@RequestBody @Valid memberDto: MemberDto): BaseResponse<Unit> {
+        memberService.validateAdminSignUp(memberDto)
+        val resultMsg: String = memberService.signUp(memberDto, Role.ADMIN)
+        return BaseResponse(message = resultMsg)
+    }
+
+    /**
      * 로그인
      */
     @PostMapping("/login")
-    fun login(@RequestBody @Valid loginDto: LoginDto): BaseResponse<TokenInfo> {
-        val tokenInfo = memberService.login(loginDto)
-        return BaseResponse(data = tokenInfo)
+    fun login(@RequestBody @Valid loginDto: LoginDto): BaseResponse<Map<String, Any?>> {
+        val memberInfo = memberService.login(loginDto)
+        return BaseResponse(data = memberInfo)
     }
 
 
@@ -74,8 +86,38 @@ class MemberController (
                    @AuthenticationPrincipal customUser: CustomUser): BaseResponse<Unit> {
         requireNotNull(memberDto.id) { "id가 null 입니다." }
         require(memberDto.id == customUser.userId) { "Token의 id와 dto의 id가 일치하지 않습니다." }
+        memberService.validateCompanyCode(memberDto.companyCode)
         val authorityRole = customUser.authorities.first().authority    // = SimpleGrantedAuthority.authority
         val resultMsg: String = memberService.saveMyInfo(memberDto, authorityRole.substring("ROLE_".length))
         return BaseResponse(message = resultMsg)
+    }
+
+    /**
+     * 사원 리스트 조회
+     */
+    @GetMapping("/admin/info")
+    fun searchEmployeeInfo(@AuthenticationPrincipal customUser: CustomUser): BaseResponse<List<MemberResponse>> {
+        val companyCode = memberService.searchMyInfo(customUser.userId).companyCode
+            ?: throw InvalidInputException("companyCode", "Admin 의 companyCode 가 등록되어있지 않습니다.")
+        val response = memberService.searchEmployeeInfo(companyCode)
+        return BaseResponse(data = response)
+    }
+
+    /**
+     * 사원 state 변경
+     */
+    @PutMapping("/admin/info")
+    fun updateState(@RequestBody @Valid memberDto: MemberDto,
+                    @AuthenticationPrincipal customUser: CustomUser): BaseResponse<Unit> {
+        val adminCompanyCode = memberService.searchMyInfo(customUser.userId).companyCode
+        require(adminCompanyCode == memberDto.companyCode) { "Admin의 companyCode와 Member의 companyCode가 일치하지 않습니다." }
+        val resultMsg: String = memberService.updateState(memberDto)
+        return BaseResponse(message = resultMsg)
+    }
+
+    @GetMapping("/colleague")
+    fun findColleague(@AuthenticationPrincipal customUser: CustomUser): BaseResponse<List<MemberResponse>> {
+        val response = memberService.findColleague(customUser.userId)
+        return BaseResponse(data = response)
     }
 }

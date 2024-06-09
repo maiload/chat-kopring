@@ -29,8 +29,9 @@ class SecurityConfig (
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .formLogin { it.disable() }
             .authorizeHttpRequests {
-                it.requestMatchers("/api/member/signup", "/api/member/login/**", "api/member/reissue-token").anonymous()
-                    .requestMatchers("/api/member/**", "/chat/history").hasAnyRole("MEMBER", "OAUTH_MEMBER")
+                it.requestMatchers("/api/member/signup/**", "/api/member/login/**", "api/member/reissue-token").anonymous()
+                    .requestMatchers("/api/member/admin/**").hasRole("ADMIN")
+                    .requestMatchers("/api/member/**", "/chat/history").hasAnyRole("MEMBER", "OAUTH_MEMBER", "ADMIN")
                     .anyRequest().permitAll()
             }
             .addFilter(corsFilter())

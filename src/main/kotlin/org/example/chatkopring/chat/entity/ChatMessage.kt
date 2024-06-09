@@ -3,9 +3,8 @@ package org.example.chatkopring.chat.entity
 import com.fasterxml.jackson.annotation.JsonBackReference
 import com.fasterxml.jackson.annotation.JsonManagedReference
 import jakarta.persistence.*
-import net.minidev.json.annotate.JsonIgnore
 import org.example.chatkopring.chat.dto.ChatMessageResponse
-import org.example.chatkopring.chat.dto.MessageType
+import org.example.chatkopring.common.status.MessageType
 
 @Entity
 @Table
@@ -25,7 +24,7 @@ class ChatMessage(
     @JoinColumn(foreignKey = ForeignKey(name = "fk_chatRoom_role_chatRoom_id"))
     val chatRoom: ChatRoom,
 
-) {
+    ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null

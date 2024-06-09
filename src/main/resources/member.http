@@ -10,7 +10,24 @@ Refresh: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2
 GET http://localhost:8080/api/member/reissue-token
 Refresh: yJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImV4cCI6MTcxNzc2NTk0MH0.LvEPzYmD-if0FSbNxmLM4ZQkgAWliEmH--Tcu0kWPGE
 
-### Sign up
+### Sign up admin
+POST http://localhost:8080/api/member/signup/admin
+Content-Type: application/json
+
+{
+  "loginId": "admin",
+  "password": "admin123!",
+  "name": "관리자",
+  "birthDate": "1996-10-24",
+  "gender": "MAN",
+  "email": "admin@email.com",
+  "ceoName": "CEO",
+  "companyName": "testCompany",
+  "businessId": "1234567890",
+  "companyCertificateNumber": "12345678901234"
+}
+
+### Sign up member
 POST http://localhost:8080/api/member/signup
 Content-Type: application/json
 
@@ -20,10 +37,19 @@ Content-Type: application/json
   "name": "이정진",
   "birthDate": "1996-10-24",
   "gender": "MAN",
-  "email": "jin@email.com"
+  "email": "jin@email.com",
+  "companyCode": "1"
 }
 
-### Log in
+### Log in admin
+POST http://localhost:8080/api/member/login
+Content-Type: application/json
+
+{
+  "loginId": "admin",
+  "password": "admin123!"
+}
+### Log in member
 POST http://localhost:8080/api/member/login
 Content-Type: application/json
 
@@ -35,30 +61,49 @@ Content-Type: application/json
 ### info
 
 GET http://localhost:8080/api/member/info
-Authorization: Bearer yJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImlhdCI6MTcxNzY1NjIzMCwiZXhwIjoxNzE3NjU4MDMwfQ.VqE5jLPeNgRSOU1ba_e93CczrfiPyXXrqyvGvqhbOfc
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjIsImlhdCI6MTcxNzkzMTc2NCwiZXhwIjoxNzE3OTM1MzY0fQ.tHiAdM6yX9pSY7JWK_q7wLFndewsFKMPebidO_2cmkw
+
+### info memberList
+
+GET http://localhost:8080/api/member/admin/info
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTc5MzU1NTgsImV4cCI6MTcxNzkzOTE1OH0.-vpQ03EJ9oTd7q94MibWY5IOEW-AMN20-qLBVk5jNzg
 
 ### info update
 
 PUT http://localhost:8080/api/member/info
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImlhdCI6MTcxNzY1NjIzMCwiZXhwIjoxNzE3NjU4MDMwfQ.VqE5jLPeNgRSOU1ba_e93CczrfiPyXXrqyvGvqhbOfc
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjIsImlhdCI6MTcxNzkzMTc2NCwiZXhwIjoxNzE3OTM1MzY0fQ.tHiAdM6yX9pSY7JWK_q7wLFndewsFKMPebidO_2cmkw
 
 {
-  "id": 1,
-  "loginId": "maiload77@gmail.com",
+  "id": 2,
+  "loginId": "jin",
   "password": "qwer123!",
   "name": "JJ L",
   "birthDate": "2000-01-01",
   "gender": "MAN",
-  "email": "maiload77@gmail.com"
+  "email": "maiload77@gmail.com",
+  "companyCode": "1"
 }
 
-//{
-//  "id": 1,
-//  "loginId": "jin",
-//  "password": "qwer123!1",
-//  "name": "이정진",
-//  "birthDate": "2000-10-24",
-//  "gender": "MAN",
-//  "email": "jin@email.com"
-//}
+### state update
+
+PUT http://localhost:8080/api/member/admin/info
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTc5MzU1NTgsImV4cCI6MTcxNzkzOTE1OH0.-vpQ03EJ9oTd7q94MibWY5IOEW-AMN20-qLBVk5jNzg
+
+{
+  "id": 2,
+  "loginId": "jin",
+  "password": "jin123!!",
+  "name": "이정진",
+  "birthDate": "1996-10-24",
+  "gender": "MAN",
+  "email": "jin@email.com",
+  "companyCode": "1",
+  "state": "APPROVED"
+}
+
+### colleague
+
+GET http://localhost:8080/api/member/colleague
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTc5MzU1NTgsImV4cCI6MTcxNzkzOTE1OH0.-vpQ03EJ9oTd7q94MibWY5IOEW-AMN20-qLBVk5jNzg

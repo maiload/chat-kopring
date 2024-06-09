@@ -1,4 +1,4 @@
-package org.example.chatkopring.chat.dto
+package org.example.chatkopring.common.status
 
 enum class MessageType {
     CONNECT,

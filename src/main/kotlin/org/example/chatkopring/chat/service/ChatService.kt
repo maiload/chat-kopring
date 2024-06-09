@@ -8,6 +8,7 @@ import org.example.chatkopring.chat.entity.ChatRoom
 import org.example.chatkopring.chat.repository.ChatImageRepository
 import org.example.chatkopring.chat.repository.ChatMessageRepository
 import org.example.chatkopring.chat.repository.ChatRoomRepository
+import org.example.chatkopring.common.status.MessageType
 import org.example.chatkopring.util.logger
 import org.springframework.data.domain.PageRequest
 import org.springframework.messaging.simp.SimpMessagingTemplate

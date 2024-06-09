@@ -2,7 +2,7 @@ package org.example.chatkopring.chat.dto
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
-import org.example.chatkopring.chat.entity.ChatRoom
+import org.example.chatkopring.common.status.MessageType
 
 data class ChatMessageDto(
     @field:NotNull

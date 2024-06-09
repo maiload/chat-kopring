@@ -1,6 +1,6 @@
 package org.example.chatkopring.chat.repository
 
-import org.example.chatkopring.chat.dto.MessageType
+import org.example.chatkopring.common.status.MessageType
 import org.example.chatkopring.chat.entity.ChatImage
 import org.example.chatkopring.chat.entity.ChatMessage
 import org.example.chatkopring.chat.entity.ChatRoom

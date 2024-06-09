@@ -6,6 +6,7 @@ import org.example.chatkopring.common.authority.TokenInfo
 import org.example.chatkopring.common.exception.InvalidInputException
 import org.example.chatkopring.common.exception.UnAuthorizationException
 import org.example.chatkopring.common.status.Role
+import org.example.chatkopring.common.status.State
 import org.example.chatkopring.member.dto.LoginDto
 import org.example.chatkopring.member.dto.MemberDto
 import org.example.chatkopring.member.dto.MemberResponse
@@ -13,14 +14,17 @@ import org.example.chatkopring.member.entity.BlackList
 import org.example.chatkopring.member.entity.Member
 import org.example.chatkopring.member.entity.MemberRole
 import org.example.chatkopring.member.repository.BlackListRepository
+import org.example.chatkopring.member.repository.CompanyRepository
 import org.example.chatkopring.member.repository.MemberRepository
 import org.example.chatkopring.member.repository.MemberRoleRepository
+import org.example.chatkopring.util.logger
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import kotlin.jvm.optionals.getOrNull
 
 @Transactional
 @Service
@@ -28,14 +32,19 @@ class MemberService(
     private val memberRepository: MemberRepository,
     private val memberRoleRepository: MemberRoleRepository,
     private val blackListRepository: BlackListRepository,
+    private val companyRepository: CompanyRepository,
     private val authenticationManagerBuilder: AuthenticationManagerBuilder,
     private val jwtTokenProvider: JwtTokenProvider,
 ) {
+    val log = logger()
     val passwordEncoder: PasswordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder()
     /**
      * 회원가입
      */
     fun signUp(memberDto: MemberDto, role: Role = Role.MEMBER): String {
+        // companyCode 확인
+        if(role == Role.MEMBER) validateCompanyCode(memberDto.companyCode)
+
         // ID 중복 검사
         var member: Member? = memberRepository.findByLoginId(memberDto.loginId)
         if (member != null) {
@@ -44,13 +53,29 @@ class MemberService(
 
         val originPw = memberDto.password
         val encodedPw = passwordEncoder.encode(originPw)
-        member = memberDto.toEntity(encodedPw)
+        member = memberDto.toEntity(encodedPw, role.name)
         memberRepository.save(member)
 
         val memberRole: MemberRole = MemberRole(null, role, member)
         memberRoleRepository.save(memberRole)
 
         return "회원가입이 완료되었습니다."
+    }
+
+    fun validateCompanyCode(companyCode: String?) {
+        requireNotNull(companyCode) { throw InvalidInputException("companyCode", "값이 null 입니다.") }
+        require(companyRepository.existsByCompanyCode(companyCode)) { throw InvalidInputException("companyCode", "유효하지 않은 코드입니다.") }
+    }
+
+    /**
+     * 기업 회원가입 검증
+     */
+    fun validateAdminSignUp(memberDto: MemberDto) {
+        requireNotNull(memberDto.ceoName) { throw InvalidInputException("ceoName", "값이 null 입니다.") }
+        requireNotNull(memberDto.businessId) { throw InvalidInputException("businessId", "값이 null 입니다.") }
+        require(!memberRepository.existsByBusinessId(memberDto.businessId!!)) { throw InvalidInputException("businessId", "이미 가입된 사업자 번호 입니다.") }
+        requireNotNull(memberDto.companyCertificateNumber) { throw InvalidInputException("companyCertificateNumber", "값이 null 입니다.") }
+        requireNotNull(memberDto.companyName) { throw InvalidInputException("companyName", "값이 null 입니다.") }
     }
 
     /**
@@ -85,14 +110,14 @@ class MemberService(
     /**
      * 로그인 -> 토큰 발행
      */
-    fun login(loginDto: LoginDto): TokenInfo {
-        val savedPw = memberRepository.findByLoginId(loginDto.loginId)?.password
+    fun login(loginDto: LoginDto): Map<String, Any?> {
+        val member = memberRepository.findByLoginId(loginDto.loginId)
             ?: throw InvalidInputException(message = "아이디 혹은 비밀번호를 다시 확인하세요.")
-        require(passwordEncoder.matches(loginDto.password, savedPw)) { "아이디 혹은 비밀번호를 다시 확인하세요." }
-        val authenticationToken = UsernamePasswordAuthenticationToken(loginDto.loginId, savedPw)
+        require(passwordEncoder.matches(loginDto.password, member.password)) { "아이디 혹은 비밀번호를 다시 확인하세요." }
+        val authenticationToken = UsernamePasswordAuthenticationToken(loginDto.loginId, member.password)
         val authentication = authenticationManagerBuilder.`object`.authenticate(authenticationToken)
-
-        return jwtTokenProvider.createToken(authentication)
+        val tokenInfo = jwtTokenProvider.createToken(authentication)
+        return mapOf("tokenInfo" to tokenInfo, "state" to member.state, "companyCode" to member.companyCode)
     }
 
     /**
@@ -104,6 +129,12 @@ class MemberService(
         return member.toResponseDto()
     }
 
+    fun searchEmployeeInfo(companyCode: String): List<MemberResponse> {
+        val members: List<Member> = memberRepository.findByCompanyCode(companyCode)
+            ?: throw InvalidInputException("companyCode", "companyCode(${companyCode})로 등록된 회원이 존재하지 않습니다.")
+        return members.map { it.toResponseDto() }
+    }
+
     /**
      * 내 정보 수정
      */
@@ -111,8 +142,26 @@ class MemberService(
         val savedPw = memberRepository.findByLoginId(memberDto.loginId)?.password
             ?: throw InvalidInputException("loginId", "존재하지 않는 ID(${memberDto.loginId}) 입니다")
         if(role == Role.MEMBER.name) require(passwordEncoder.matches(memberDto.password, savedPw)) { "비밀번호를 다시 확인하세요." }
-        val member: Member = memberDto.toEntity(savedPw)
+        val member: Member = memberDto.toEntity(savedPw, role)
         memberRepository.save(member)
         return "수정 완료되었습니다."
+    }
+
+    /**
+     * state 변경
+     */
+    fun updateState(memberDto: MemberDto): String {
+        val member = memberRepository.findById(memberDto.id!!).get()
+        member.state = memberDto.state
+        memberRepository.save(member)
+        return if (memberDto.state == State.APPROVED) "승인되었습니다." else "거절되었습니다."
+    }
+
+    fun findColleague(userId : Long): List<MemberResponse> {
+        val member = memberRepository.findById(userId).get()
+        requireNotNull(member.companyCode) { "CompanyCode 가 등록되지 않은 유저 입니다" }
+        if (member.state != State.APPROVED) throw InvalidInputException("${member.state}", "승인되지 않은 사용자 입니다.")
+        return memberRepository.findByCompanyCodeAndState(member.companyCode!!, member.state)
+            .map { it.toResponseDto() }
     }
 }

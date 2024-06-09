@@ -3,10 +3,12 @@ package org.example.chatkopring.member.dto
 import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Null
 import jakarta.validation.constraints.Pattern
 import org.example.chatkopring.common.annotation.ValidEnum
 import org.example.chatkopring.common.status.Gender
+import org.example.chatkopring.common.status.Role
+import org.example.chatkopring.common.status.State
 import org.example.chatkopring.member.entity.Member
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -53,6 +55,27 @@ data class MemberDto(
     @field:Email
     @JsonProperty("email")
     private val _email: String?,
+
+    @JsonProperty("companyCode")
+    private val _companyCode: String? = null,
+
+    @JsonProperty("ceoName")
+    private val _ceoName: String? = null,
+
+    @JsonProperty("companyName")
+    private val _companyName: String? = null,
+
+    @field:Pattern(regexp = "^\\d{10}$", message = "사업자등록번호(10자리)를 확인해주세요")
+    @JsonProperty("businessId")
+    private val _businessId: String? = null,
+
+    @field:Pattern(regexp = "^\\d{14}$", message = "기업인증 번호(14자리)를 확인해주세요")
+    @JsonProperty("companyCertificateNumber")
+    private val _companyCertificateNumber: String? = null,
+
+    @field:ValidEnum(enumClass = State::class, message = "APPROVED 나 DENIED 중 하나를 선택해주세요.")
+    @JsonProperty("state")
+    private val _state: String? = State.PENDING.name,
 ) {
 
     val loginId: String
@@ -67,10 +90,24 @@ data class MemberDto(
         get() = Gender.valueOf(_gender!!)
     val email: String
         get() = _email!!
+    val companyCode: String?
+        get() = _companyCode
+    val ceoName: String?
+        get() = _ceoName
+    val companyName: String?
+        get() = _companyName
+    val businessId: String?
+        get() = _businessId
+    val companyCertificateNumber: String?
+        get() = _companyCertificateNumber
+    val state: State
+        get() = State.valueOf(_state!!)
 
 
-    fun toEntity(password: String): Member =
-        Member(id, loginId, password, name, birthDate, gender, email)
+    fun toEntity(password: String, role: String): Member =
+        if (role == Role.ADMIN.name) Member(id, loginId, password, name, birthDate, gender, email,
+            companyCode, ceoName, companyName, businessId, companyCertificateNumber)
+        else Member(id, loginId, password, name, birthDate, gender, email, companyCode)
 
     private fun String.toLocalDate(): LocalDate =
         LocalDate.parse(this, DateTimeFormatter.ofPattern("yyyy-MM-dd"))

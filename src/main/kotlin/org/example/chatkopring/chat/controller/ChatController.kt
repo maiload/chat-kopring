@@ -5,6 +5,7 @@ import org.example.chatkopring.chat.dto.*
 import org.example.chatkopring.chat.entity.ChatRoom
 import org.example.chatkopring.chat.service.ChatService
 import org.example.chatkopring.common.dto.BaseResponse
+import org.example.chatkopring.common.status.MessageType
 import org.example.chatkopring.common.status.ResultCode
 import org.example.chatkopring.util.logger
 import org.springframework.context.event.EventListener
@@ -47,7 +48,7 @@ class ChatController(
         log.info("User Disconnected : $user")
         if(user != null) {
             userSessionRegistry.removeSession(user.name)
-            messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.DISCONNECT, user.name, null))
+            messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.DISCONNECT, user.name))
         }
     }
 
@@ -56,7 +57,7 @@ class ChatController(
         val user = StompHeaderAccessor.wrap(event.message).user
         log.info("User Unsubscribed : $user")
         if(user != null) {
-            messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.INACTIVE, user.name, null))
+            messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.INACTIVE, user.name))
         }
     }
 

@@ -8,4 +8,6 @@ data class MemberResponse(
     val gender: String,
     val email: String,
     val role: String,
+    val companyCode: String?,
+    val state: String,
 )
