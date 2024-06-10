@@ -10,4 +10,5 @@ data class MemberResponse(
     val role: String,
     val companyCode: String?,
     val state: String,
+    val profile: String,
 )

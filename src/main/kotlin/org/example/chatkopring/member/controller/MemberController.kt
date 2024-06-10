@@ -85,8 +85,8 @@ class MemberController (
     fun saveMyInfo(@RequestBody @Valid memberDto: MemberDto,
                    @AuthenticationPrincipal customUser: CustomUser): BaseResponse<Unit> {
         requireNotNull(memberDto.id) { "id가 null 입니다." }
-        require(memberDto.id == customUser.userId) { "Token의 id와 dto의 id가 일치하지 않습니다." }
-        memberService.validateCompanyCode(memberDto.companyCode)
+        require(memberDto.id == customUser.userId) { "Token의 id와 입력된 id가 일치하지 않습니다." }
+        memberDto.companyCode?.let { memberService.validateCompanyCode(it) }
         val authorityRole = customUser.authorities.first().authority    // = SimpleGrantedAuthority.authority
         val resultMsg: String = memberService.saveMyInfo(memberDto, authorityRole.substring("ROLE_".length))
         return BaseResponse(message = resultMsg)
@@ -119,5 +119,13 @@ class MemberController (
     fun findColleague(@AuthenticationPrincipal customUser: CustomUser): BaseResponse<List<MemberResponse>> {
         val response = memberService.findColleague(customUser.userId)
         return BaseResponse(data = response)
+    }
+
+    @GetMapping("/colleague/notJoin")
+    fun findNotJoinedColleague(@RequestParam roomId: String,
+                               @AuthenticationPrincipal customUser: CustomUser): BaseResponse<List<MemberResponse>> {
+        val response = memberService.findColleague(customUser.userId, roomId)
+        return BaseResponse(data = response,
+            message = if (response.isEmpty()) "모든 사용자가 참여중입니다." else "${response.size}명의 미참여 유저가 있습니다.")
     }
 }

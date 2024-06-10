@@ -38,6 +38,9 @@ class Member(
     @Column(nullable = false, length = 30)
     val email: String,
 
+    @Column(nullable = false, length = 300)
+    val profile: String,
+
     @Column(nullable = true, length = 20)
     val companyCode: String? = null,
 
@@ -53,6 +56,7 @@ class Member(
     @Column(nullable = false, length = 10)
     @Enumerated(EnumType.STRING)
     var state: State = State.PENDING,
+
     ) {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "member")
     val memberRole: List<MemberRole>? = null
@@ -61,15 +65,17 @@ class Member(
         this.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
 
     fun toResponseDto(): MemberResponse =
-        MemberResponse(id!!, loginId, name, birthDate.formatDate(), gender.desc, email, memberRole!!.first().role.name, companyCode, state.name)
+        MemberResponse(id!!, loginId, name, birthDate.formatDate(), gender.desc, email, memberRole!!.first().role.name, companyCode, state.name, profile)
 
     fun toDto(): MemberDto =
         MemberDto(id!!, loginId, password, name, birthDate.formatDate(), gender.desc, email)
 
     override fun toString(): String {
         return "Member(id=$id, loginId='$loginId', password='$password', name='$name', birthDate=$birthDate, gender=$gender, email='$email', " +
-                "ceoName=$ceoName, companyName=$companyName, businessId=$businessId, companyCertificateNumber=$companyCertificateNumber, memberRole=$memberRole)"
+                "companyCode=$companyCode, ceoName=$ceoName, companyName=$companyName, businessId=$businessId, companyCertificateNumber=$companyCertificateNumber, " +
+                "state=$state, profile='$profile', memberRole=$memberRole)"
     }
+
 
 }
 

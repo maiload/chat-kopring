@@ -16,18 +16,19 @@ class ChatMessage(
     @Enumerated(EnumType.STRING)
     val type: MessageType,
 
-    @Column(nullable = true, length = 300)
-    val content: String?,       // 이미지 -> 파일명
-
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(foreignKey = ForeignKey(name = "fk_chatRoom_role_chatRoom_id"))
+    @JoinColumn(foreignKey = ForeignKey(name = "fk_chat_message_chatRoom_id"))
     val chatRoom: ChatRoom,
+
+    @Column(nullable = true, length = 300)
+    val content: String? = null,       // 이미지 -> 파일명
+
 
     ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long? = null
+    val id: Long? = null
 
     @JsonManagedReference
     @Column(nullable = true)

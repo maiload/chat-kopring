@@ -14,7 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
 import java.util.*
 
-const val EXPIRATION_MILLISECONDS: Long = 60 * 60 * 1000
+const val EXPIRATION_MILLISECONDS: Long = 60 * 60 * 1000    // 1시간
 //const val EXPIRATION_MILLISECONDS: Long = 1 * 60 * 1000
 
 @Component
@@ -35,7 +35,7 @@ class JwtTokenProvider {
             .joinToString(",") { it.authority }
 
         val now = Date()
-        val accessExpiration = Date(now.time + EXPIRATION_MILLISECONDS)     // 1시간
+        val accessExpiration = Date(now.time + EXPIRATION_MILLISECONDS * 24)     // 1시간
         val refreshExpiration = Date(now.time + EXPIRATION_MILLISECONDS * 48)   // 48시간
 
         // Access Token

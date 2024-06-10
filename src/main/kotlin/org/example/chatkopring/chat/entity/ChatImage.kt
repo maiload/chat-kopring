@@ -14,7 +14,7 @@ class ChatImage(
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(foreignKey = ForeignKey(name = "fk_chatMessage_role_chatMessage_id"))
+    @JoinColumn(foreignKey = ForeignKey(name = "fk_chat_image_chatMessage_id"))
     val chatMessage: ChatMessage,
 ) {
     @Id

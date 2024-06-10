@@ -56,6 +56,9 @@ data class MemberDto(
     @JsonProperty("email")
     private val _email: String?,
 
+    @JsonProperty("profile")
+    private val _profile: String? = "안녕하세요!",
+
     @JsonProperty("companyCode")
     private val _companyCode: String? = null,
 
@@ -102,12 +105,14 @@ data class MemberDto(
         get() = _companyCertificateNumber
     val state: State
         get() = State.valueOf(_state!!)
+    val profile: String
+        get() = _profile!!
 
 
     fun toEntity(password: String, role: String): Member =
-        if (role == Role.ADMIN.name) Member(id, loginId, password, name, birthDate, gender, email,
+        if (role == Role.ADMIN.name) Member(id, loginId, password, name, birthDate, gender, email, profile,
             companyCode, ceoName, companyName, businessId, companyCertificateNumber)
-        else Member(id, loginId, password, name, birthDate, gender, email, companyCode)
+        else Member(id, loginId, password, name, birthDate, gender, email, profile, companyCode)
 
     private fun String.toLocalDate(): LocalDate =
         LocalDate.parse(this, DateTimeFormatter.ofPattern("yyyy-MM-dd"))

@@ -37,8 +37,7 @@ Content-Type: application/json
   "name": "이정진",
   "birthDate": "1996-10-24",
   "gender": "MAN",
-  "email": "jin@email.com",
-  "companyCode": "1"
+  "email": "jin@email.com"
 }
 
 ### Log in admin
@@ -61,18 +60,18 @@ Content-Type: application/json
 ### info
 
 GET http://localhost:8080/api/member/info
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjIsImlhdCI6MTcxNzkzMTc2NCwiZXhwIjoxNzE3OTM1MzY0fQ.tHiAdM6yX9pSY7JWK_q7wLFndewsFKMPebidO_2cmkw
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTc5OTYyNzUsImV4cCI6MTcxODA4MjY3NX0.XROnnUkYFj1PAbgg5KlQrnxZYj1dU4zuH0DGD8ERxAs
 
 ### info memberList
 
 GET http://localhost:8080/api/member/admin/info
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTc5MzU1NTgsImV4cCI6MTcxNzkzOTE1OH0.-vpQ03EJ9oTd7q94MibWY5IOEW-AMN20-qLBVk5jNzg
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTc5OTYyNzUsImV4cCI6MTcxODA4MjY3NX0.XROnnUkYFj1PAbgg5KlQrnxZYj1dU4zuH0DGD8ERxAs
 
 ### info update
 
 PUT http://localhost:8080/api/member/info
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjIsImlhdCI6MTcxNzkzMTc2NCwiZXhwIjoxNzE3OTM1MzY0fQ.tHiAdM6yX9pSY7JWK_q7wLFndewsFKMPebidO_2cmkw
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjIsImlhdCI6MTcxODAwMzIzMiwiZXhwIjoxNzE4MDg5NjMyfQ.4VbOR2zkeQAlfwcYNGQXKoyGFdcbKBMHv_smzObNX8w
 
 {
   "id": 2,
@@ -89,7 +88,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NR
 
 PUT http://localhost:8080/api/member/admin/info
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTc5MzU1NTgsImV4cCI6MTcxNzkzOTE1OH0.-vpQ03EJ9oTd7q94MibWY5IOEW-AMN20-qLBVk5jNzg
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTc5OTYyNzUsImV4cCI6MTcxODA4MjY3NX0.XROnnUkYFj1PAbgg5KlQrnxZYj1dU4zuH0DGD8ERxAs
 
 {
   "id": 2,
@@ -103,7 +102,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX
   "state": "APPROVED"
 }
 
-### colleague
+### Approved colleague
 
 GET http://localhost:8080/api/member/colleague
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTc5MzU1NTgsImV4cCI6MTcxNzkzOTE1OH0.-vpQ03EJ9oTd7q94MibWY5IOEW-AMN20-qLBVk5jNzg
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTc5OTYyNzUsImV4cCI6MTcxODA4MjY3NX0.XROnnUkYFj1PAbgg5KlQrnxZYj1dU4zuH0DGD8ERxAs
+
+
+### NotJoined colleague
+
+GET http://localhost:8080/api/member/colleague/notJoin?
+    roomId=1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTc5OTYyNzUsImV4cCI6MTcxODA4MjY3NX0.XROnnUkYFj1PAbgg5KlQrnxZYj1dU4zuH0DGD8ERxAs
