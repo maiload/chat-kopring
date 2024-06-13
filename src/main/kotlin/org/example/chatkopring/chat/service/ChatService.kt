@@ -41,18 +41,7 @@ class ChatService(
         messagingTemplate.convertAndSend("/sub/chat/${chatRoomDto.roomId}", createChatMessage)
 //        activeRoom(chatRoomDto)
     }
-//    fun createRoom(chatMessageDto: ChatMessageDto) {
-//        val chatRoom = ChatRoom(chatMessageDto.roomId, chatMessageDto.sender, 1, chatMessageDto.receiver!!)
-//        chatRoomRepository.save(chatRoom)
-//        val chatMessage = ChatMessage(chatMessageDto.sender, chatMessageDto.type, chatMessageDto.content, chatRoom)
-//        chatMessageRepository.save(chatMessage)
-//        messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
-//        activeRoom(chatMessageDto.sender, chatMessageDto.roomId)
-//        if (chatMessageDto.receiver != "ALL") {
-//            // 개인 채팅 -> 강제 JOIN
-//            enterRoom(ChatMessageDto(MessageType.JOIN, null, null, chatMessageDto.receiver, chatMessageDto.sender, chatMessageDto.roomId))
-//        }
-//    }
+
 
     fun isPrivateRoomExist(creator: String, receiver: String, chatRoomDto: ChatRoomDto): String? {
         val creatorChatRoomList = chatRoomRepository.findByRoomTypeAndCreatorAndValid(RoomType.PRIVATE, creator, true)
@@ -112,13 +101,6 @@ class ChatService(
         }
     }
 
-
-//    fun isReceiverLeaveTheRoom(roomId: String): Boolean {
-//        // 오픈 채팅방은 public 알림 제외
-//        val chatRoom = getChatRoomById(roomId)
-//        return chatRoom?.receiver == "ALL" || chatRoom?.joinNumber == 1L
-//    }
-
     fun saveBase64Image(base64Image: String, outputPath: String) {
         val imageBytes = Base64.getDecoder().decode(base64Image)
         FileOutputStream(outputPath).use { outputStream ->
@@ -126,60 +108,6 @@ class ChatService(
             outputStream.flush()
         }
     }
-
-//    fun validateChatRoom(chatRoomDto: ChatRoomDto): Boolean {
-//        val chatRoom = chatRoomRepository.findById(chatRoomDto.roomId).getOrNull()
-//        if (chatRoom == null) {
-//            sendErrorMessage(ErrorMessage("존재하지 않는 방입니다.", chatRoomDto.creator, chatRoomDto.roomId))
-//            throw RuntimeException()
-//        }
-//        chatRoom.participants.
-//        val creator = chatRoom.creator
-////        log.info("validate : $receiver, $creator, ${chatRoomDto.sender}")
-//        return receiver == "ALL" || receiver == chatRoomDto.creator || creator == chatRoomDto.creator
-//    }
-
-//    fun enterRoom(chatRoomDto: ChatRoomDto) {
-//        val chatRoom = chatRoomRepository.findById(chatMessageDto.roomId).get()
-//        if(chatMessageDto.sender in listOf(chatRoom.receiver, chatRoom.creator)){
-//            if(chatRoom.joinNumber == 2L){
-//                // 개인 -> 활성화
-//                activeRoom(chatMessageDto.sender, chatMessageDto.roomId)
-//            }else{
-//                val lastChatMessage = getLastChatMessage(chatMessageDto.roomId, chatMessageDto.sender)
-//                if(chatRoom.joinNumber == 1L && chatMessageDto.sender == chatRoom.creator){
-//                    if(lastChatMessage?.type == MessageType.LEAVE) {
-//                        // 본인방 퇴장 후 재입장 -> 입장
-//                        canEnterRoom(chatMessageDto, chatRoom)
-//                        activeRoom(chatMessageDto.sender, chatMessageDto.roomId)
-//                        messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
-//                    }else{
-//                        // 본인방 재입장 -> 활성화
-//                        activeRoom(chatMessageDto.sender, chatMessageDto.roomId)
-//                    }
-//                }else{
-//                    // 개인 -> receiver 퇴장 후 재입장
-//                    if (isReceiverLeaveTheRoom(chatMessageDto.roomId)) {
-//                        activeRoom(chatMessageDto.sender, chatMessageDto.roomId)
-//                    }
-//
-//                    // 개인 -> receiver 강제 입장
-//                    canEnterRoom(chatMessageDto, chatRoom)
-//                    messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
-//                }
-//            }
-//        }else{
-//            if(validateEnterHistory(chatMessageDto)){
-//                // 전체 -> 활성화
-//                activeRoom(chatMessageDto.sender, chatMessageDto.roomId)
-//            }else{
-//                // 전체 -> 입장
-//                canEnterRoom(chatMessageDto, chatRoom)
-//                activeRoom(chatMessageDto.sender, chatMessageDto.roomId)
-//                messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
-//            }
-//        }
-//    }
 
     fun activeRoom(chatRoomDto: ChatRoomDto) {
         // INACTIVE ChatMessage 삭제
@@ -196,16 +124,6 @@ class ChatService(
     }
 
     fun loadAllParticipatedRooms(loginId: String) = participantRepository.findByLoginIdOrderByIdDesc(loginId)
-
-
-
-//    fun canEnterRoom(chatMessageDto: ChatMessageDto, chatRoom: ChatRoom) {
-//        chatRoom.joinNumber += 1
-//        chatRoomRepository.save(chatRoom)
-//        val chatMessage = ChatMessage(chatMessageDto.sender, chatMessageDto.type, chatMessageDto.content, chatRoom)
-//        chatMessageRepository.save(chatMessage)
-////        log.info("${chatMessageDto.sender} joined the room (${chatMessageDto.roomId})")
-//    }
 
     fun joinRoom(chatRoomDto: ChatRoomDto) {
         val (roomId, creator, roomType, title) = chatRoomDto
@@ -288,22 +206,6 @@ class ChatService(
             }
     }
 
-//    fun validateEnterHistory(chatMessageDto: ChatMessageDto): Boolean {
-//        val lastChatMessage = getLastChatMessage(chatMessageDto.roomId, chatMessageDto.sender) ?: return false
-//        return lastChatMessage.type !in listOf(MessageType.LEAVE)
-////        return when (chatMessageDto.type) {
-////            MessageType.JOIN, -> lastChatMessage.type != MessageType.LEAVE
-////            MessageType.LEAVE -> lastChatMessage.type in listOf(MessageType.LEAVE, MessageType.CREATE)
-////            MessageType.CHAT, MessageType.IMAGE -> lastChatMessage.type !in listOf(MessageType.LEAVE, MessageType.CREATE)
-////            else -> false
-////        }
-//    }
-
-//    fun validateEnterHistory(roomId: String, sender: String): Boolean {
-//        val lastChatMessage = getLastChatMessage(roomId, sender) ?: return false
-//        return lastChatMessage.type !in listOf(MessageType.LEAVE, MessageType.CREATE)
-//    }
-
     fun getChatRoomById(roomId: String) = chatRoomRepository.findById(roomId).getOrNull()
 
     fun String.generateStorageFileName(): String {
@@ -330,4 +232,102 @@ class ChatService(
         }
     }
 
+    //    fun isReceiverLeaveTheRoom(roomId: String): Boolean {
+//        // 오픈 채팅방은 public 알림 제외
+//        val chatRoom = getChatRoomById(roomId)
+//        return chatRoom?.receiver == "ALL" || chatRoom?.joinNumber == 1L
+//    }
+
+
+    //    fun validateChatRoom(chatRoomDto: ChatRoomDto): Boolean {
+//        val chatRoom = chatRoomRepository.findById(chatRoomDto.roomId).getOrNull()
+//        if (chatRoom == null) {
+//            sendErrorMessage(ErrorMessage("존재하지 않는 방입니다.", chatRoomDto.creator, chatRoomDto.roomId))
+//            throw RuntimeException()
+//        }
+//        chatRoom.participants.
+//        val creator = chatRoom.creator
+////        log.info("validate : $receiver, $creator, ${chatRoomDto.sender}")
+//        return receiver == "ALL" || receiver == chatRoomDto.creator || creator == chatRoomDto.creator
+//    }
+
+//    fun enterRoom(chatRoomDto: ChatRoomDto) {
+//        val chatRoom = chatRoomRepository.findById(chatMessageDto.roomId).get()
+//        if(chatMessageDto.sender in listOf(chatRoom.receiver, chatRoom.creator)){
+//            if(chatRoom.joinNumber == 2L){
+//                // 개인 -> 활성화
+//                activeRoom(chatMessageDto.sender, chatMessageDto.roomId)
+//            }else{
+//                val lastChatMessage = getLastChatMessage(chatMessageDto.roomId, chatMessageDto.sender)
+//                if(chatRoom.joinNumber == 1L && chatMessageDto.sender == chatRoom.creator){
+//                    if(lastChatMessage?.type == MessageType.LEAVE) {
+//                        // 본인방 퇴장 후 재입장 -> 입장
+//                        canEnterRoom(chatMessageDto, chatRoom)
+//                        activeRoom(chatMessageDto.sender, chatMessageDto.roomId)
+//                        messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
+//                    }else{
+//                        // 본인방 재입장 -> 활성화
+//                        activeRoom(chatMessageDto.sender, chatMessageDto.roomId)
+//                    }
+//                }else{
+//                    // 개인 -> receiver 퇴장 후 재입장
+//                    if (isReceiverLeaveTheRoom(chatMessageDto.roomId)) {
+//                        activeRoom(chatMessageDto.sender, chatMessageDto.roomId)
+//                    }
+//
+//                    // 개인 -> receiver 강제 입장
+//                    canEnterRoom(chatMessageDto, chatRoom)
+//                    messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
+//                }
+//            }
+//        }else{
+//            if(validateEnterHistory(chatMessageDto)){
+//                // 전체 -> 활성화
+//                activeRoom(chatMessageDto.sender, chatMessageDto.roomId)
+//            }else{
+//                // 전체 -> 입장
+//                canEnterRoom(chatMessageDto, chatRoom)
+//                activeRoom(chatMessageDto.sender, chatMessageDto.roomId)
+//                messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
+//            }
+//        }
+//    }
+
+    //    fun canEnterRoom(chatMessageDto: ChatMessageDto, chatRoom: ChatRoom) {
+//        chatRoom.joinNumber += 1
+//        chatRoomRepository.save(chatRoom)
+//        val chatMessage = ChatMessage(chatMessageDto.sender, chatMessageDto.type, chatMessageDto.content, chatRoom)
+//        chatMessageRepository.save(chatMessage)
+////        log.info("${chatMessageDto.sender} joined the room (${chatMessageDto.roomId})")
+//    }
+
+    //    fun validateEnterHistory(chatMessageDto: ChatMessageDto): Boolean {
+//        val lastChatMessage = getLastChatMessage(chatMessageDto.roomId, chatMessageDto.sender) ?: return false
+//        return lastChatMessage.type !in listOf(MessageType.LEAVE)
+////        return when (chatMessageDto.type) {
+////            MessageType.JOIN, -> lastChatMessage.type != MessageType.LEAVE
+////            MessageType.LEAVE -> lastChatMessage.type in listOf(MessageType.LEAVE, MessageType.CREATE)
+////            MessageType.CHAT, MessageType.IMAGE -> lastChatMessage.type !in listOf(MessageType.LEAVE, MessageType.CREATE)
+////            else -> false
+////        }
+//    }
+
+//    fun validateEnterHistory(roomId: String, sender: String): Boolean {
+//        val lastChatMessage = getLastChatMessage(roomId, sender) ?: return false
+//        return lastChatMessage.type !in listOf(MessageType.LEAVE, MessageType.CREATE)
+//    }
+
+
+//    fun createRoom(chatMessageDto: ChatMessageDto) {
+//        val chatRoom = ChatRoom(chatMessageDto.roomId, chatMessageDto.sender, 1, chatMessageDto.receiver!!)
+//        chatRoomRepository.save(chatRoom)
+//        val chatMessage = ChatMessage(chatMessageDto.sender, chatMessageDto.type, chatMessageDto.content, chatRoom)
+//        chatMessageRepository.save(chatMessage)
+//        messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
+//        activeRoom(chatMessageDto.sender, chatMessageDto.roomId)
+//        if (chatMessageDto.receiver != "ALL") {
+//            // 개인 채팅 -> 강제 JOIN
+//            enterRoom(ChatMessageDto(MessageType.JOIN, null, null, chatMessageDto.receiver, chatMessageDto.sender, chatMessageDto.roomId))
+//        }
+//    }
 }

@@ -65,6 +65,7 @@ class ChatController(
             // 모든 방 INACTIVE
             val allParticipatedRooms = chatService.loadAllParticipatedRooms(user.name)
             allParticipatedRooms?.forEach { chatService.inactiveRoom(it.toChatRoomDto()) }
+
         }
     }
 
@@ -92,19 +93,30 @@ class ChatController(
             message = if (response.isNullOrEmpty()) "현재 참여중인 방이 없습니다." else "${response.size}개의 채팅방을 불러왔습니다.")
     }
 
-
+    /**
+     * 메세지 전송
+     * @param chatMessageDto(type, content, sender, roomId)
+     */
     @MessageMapping("/chat/sendMessage")
-    fun sendMessage(@Payload chatMessageDto: ChatMessageDto) {
+    fun sendMessage(@Payload @Valid chatMessageDto: ChatMessageDto) {
         val chatRoom = chatService.getChatRoomById(chatMessageDto.roomId)
         requireNotNull(chatRoom)
         chatService.sendMessage(chatMessageDto, chatRoom)
     }
 
+    /**
+     * 방 퇴장
+     * @param chatRoomDto(creator, roomType, roomId)
+     */
     @MessageMapping("/chat/leaveRoom")
     fun leaveRoom(@Payload @Valid chatRoomDto: ChatRoomDto) =
         chatService.leaveRoom(chatRoomDto)
 
 
+    /**
+     * 방 초대
+     * @param chatRoomDto(creator, roomType, participant)
+     */
     @MessageMapping("/chat/inviteRoom")
     fun inviteRoom(@Payload @Valid chatRoomDto: ChatRoomDto, headerAccessor: SimpMessageHeaderAccessor) {
         val loginId = headerAccessor.user!!.name
@@ -112,7 +124,7 @@ class ChatController(
     }
 
     /**
-     * 방 생성
+     * 방 생성 - ALL
      * @param chatRoomDto(creator, roomType)
      */
     @MessageMapping("/chat/createRoom/all")
@@ -135,6 +147,10 @@ class ChatController(
         }
     }
 
+    /**
+     * 방 생성 - GROUP
+     * @param chatRoomDto(creator, roomType, participant)
+     */
     @MessageMapping("/chat/createRoom/group")
     fun createGroupRoom(@Payload @Valid chatRoomDto: ChatRoomDto, headerAccessor: SimpMessageHeaderAccessor) {
         val (roomId, creator, roomType, title) = chatRoomDto
@@ -154,6 +170,11 @@ class ChatController(
         }
     }
 
+
+    /**
+     * 방 생성 - PRIVATE
+     * @param chatRoomDto(creator, roomType, participant)
+     */
     @MessageMapping("/chat/createRoom/private")
     fun createPrivateRoom(@Payload @Valid chatRoomDto: ChatRoomDto, headerAccessor: SimpMessageHeaderAccessor) {
         val (roomId, creator, roomType, title) = chatRoomDto
