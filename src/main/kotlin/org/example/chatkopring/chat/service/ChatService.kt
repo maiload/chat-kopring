@@ -72,7 +72,8 @@ class ChatService(
         val chatRoomDto = chatMessageDto.toChatRoomDto(chatRoom.roomType)
         val (roomId, creator, roomType, title) = chatRoomDto
         val isJoinedRoom = participantRepository.existsByChatRoomAndLoginId(chatRoomDto.toEntity(), creator)
-        if(isJoinedRoom){
+        val isInActive = chatMessageRepository.existsByChatRoomAndSenderAndType(chatRoomDto.toEntity(), creator, MessageType.INACTIVE)
+        if(isJoinedRoom && !isInActive){
             val chatMessage = chatRoomDto.makeChatMessage(chatMessageDto.type)
             // 이미지 처리
             if (chatMessageDto.type == MessageType.IMAGE){
@@ -97,7 +98,7 @@ class ChatService(
             messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(chatMessageDto.type, chatMessageDto.sender, chatMessageDto.roomId))
             log.info("${chatMessageDto.sender} sent message to room (${chatMessageDto.roomId})")
         }else{
-            sendErrorMessage(ErrorMessage("입장중인 방이 아닙니다.", creator, roomId))
+            sendErrorMessage(ErrorMessage("입장중인 방이 아니거나 Active 되지 않았습니다.", creator, roomId))
         }
     }
 
