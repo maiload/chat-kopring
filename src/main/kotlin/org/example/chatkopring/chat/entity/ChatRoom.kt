@@ -36,11 +36,11 @@ class ChatRoom(
     var valid: Boolean = true,
 ) {
     @JsonManagedReference
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "chatRoom", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "chatRoom", cascade = [CascadeType.ALL])
     val chatMessages: List<ChatMessage>? = null
 
     @JsonManagedReference
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "chatRoom", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "chatRoom", cascade = [CascadeType.ALL])
     val participants: List<Participant>? = null
 
     fun toChatRoomDto(creator: String) = ChatRoomDto(id, creator, roomType, title)

@@ -7,6 +7,7 @@ import org.example.chatkopring.chat.entity.ChatRoom
 import org.example.chatkopring.chat.entity.Participant
 import org.example.chatkopring.common.status.RoomType
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -42,6 +43,7 @@ interface ChatImageRepository: JpaRepository<ChatImage, Long> {
 }
 
 interface ParticipantRepository: JpaRepository<Participant, Long> {
+    @EntityGraph(attributePaths = ["chatRoom"])
     fun findByLoginIdOrderByIdDesc(loginId: String): List<Participant>?
     fun findByLoginIdAndChatRoom(loginId: String, chatRoom: ChatRoom): Participant
     fun existsByChatRoomAndLoginId(chatRoom: ChatRoom, loginId: String): Boolean
