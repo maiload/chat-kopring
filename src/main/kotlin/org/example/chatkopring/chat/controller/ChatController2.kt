@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.socket.messaging.SessionConnectEvent
 import org.springframework.web.socket.messaging.SessionDisconnectEvent
+import org.springframework.web.socket.messaging.SessionSubscribeEvent
 import org.springframework.web.socket.messaging.SessionUnsubscribeEvent
 
 @Controller
@@ -62,19 +63,22 @@ class ChatController2(
         if(user != null) {
             userSessionRegistry.removeSession(user.name)
             messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.DISCONNECT, user.name))
+            // 모든 방 INACTIVE
+            val allParticipatedRooms = chatService.loadAllParticipatedRooms(user.name)
+            allParticipatedRooms?.forEach { chatService.inactiveRoom(it.toChatRoomDto()) }
         }
     }
 
     @EventListener
     fun handleWebSocketUnsubscribeListener(event: SessionUnsubscribeEvent) {
-        val user = StompHeaderAccessor.wrap(event.message).user
-        log.info("User Unsubscribed : $user")
-        if(user != null) {
-            // 모든 방 INACTIVE
-            val allParticipatedRooms = chatService.loadAllParticipatedRooms(user.name)
-            allParticipatedRooms?.forEach { chatService.inactiveRoom(it.toChatRoomDto()) }
+        val headerAccessor = StompHeaderAccessor.wrap(event.message)
+        log.info("User Unsubscribed : ${headerAccessor.user?.name}, Destination : ${headerAccessor.destination}")
+    }
 
-        }
+    @EventListener
+    fun handleWebSocketSubscribeListener(event: SessionSubscribeEvent) {
+        val headerAccessor = StompHeaderAccessor.wrap(event.message)
+        log.info("User Subscribed : ${headerAccessor.user?.name}, Destination : ${headerAccessor.destination}")
     }
 
     @ResponseBody
@@ -102,6 +106,16 @@ class ChatController2(
     }
 
     fun messageToJSON(dto: Any): String = jacksonObjectMapper().writeValueAsString(dto)
+
+    /**
+     * 채팅방 끄기 (INACTIVE)
+     * @param chatRoomDto(creator, roomType, roomId)
+     */
+    @MessageMapping("/chat/outRoom")
+    fun outRoom(@Payload @Valid chatRoomDto: ChatRoomDto, headerAccessor: SimpMessageHeaderAccessor) {
+        val message = MessageDto(headerAccessor.user!!.name, MessageType.INACTIVE.name, chatRoomDto)
+        rabbitTemplate.convertAndSend(rabbitmqConfig.directExchange().name, rabbitmqConfig.outQueue().name, messageToJSON(message))
+    }
 
 
     /**

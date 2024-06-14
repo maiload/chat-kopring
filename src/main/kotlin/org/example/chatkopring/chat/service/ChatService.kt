@@ -38,8 +38,8 @@ class ChatService(
         chatRoomRepository.save(chatRoomDto.toEntity())
         val createChatMessage = chatRoomDto.makeChatMessage(MessageType.CREATE)
         chatMessageRepository.save(createChatMessage)
+        messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(createChatMessage.type, createChatMessage.sender, chatRoomDto.roomId))
         messagingTemplate.convertAndSend("/sub/chat/${chatRoomDto.roomId}", createChatMessage)
-//        activeRoom(chatRoomDto)
     }
 
 
@@ -120,8 +120,16 @@ class ChatService(
     }
 
     fun inactiveRoom(chatRoomDto: ChatRoomDto) {
-        chatMessageRepository.save(chatRoomDto.makeChatMessage(MessageType.INACTIVE))
-        messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.INACTIVE, chatRoomDto.creator, chatRoomDto.roomId))
+        val chatRoom = chatRoomDto.toEntity()
+        val (roomId, creator, roomType, title) = chatRoomDto
+        val isJoinedRoom = participantRepository.existsByChatRoomAndLoginId(chatRoom, creator)
+        val isInActive = chatMessageRepository.existsByChatRoomAndSenderAndType(chatRoom, creator, MessageType.INACTIVE)
+        if(isJoinedRoom && !isInActive) {
+            chatMessageRepository.save(chatRoomDto.makeChatMessage(MessageType.INACTIVE))
+            messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.INACTIVE, creator, roomId))
+        }else{
+            sendErrorMessage(ErrorMessage("입장중인 방이 아니거나 이미 INACTIVE 상태 입니다.", creator, roomId))
+        }
     }
 
     fun loadAllParticipatedRooms(loginId: String) = participantRepository.findByLoginIdOrderByIdDesc(loginId)
@@ -131,7 +139,6 @@ class ChatService(
         participantRepository.save(Participant(chatRoomDto.toEntity(), creator))
         val joinChatMessage = chatRoomDto.makeChatMessage(MessageType.JOIN)
         chatMessageRepository.save(joinChatMessage)
-//        inactiveRoom(chatRoomDto)
         log.info("$creator joined the room ($roomId)")
         messagingTemplate.convertAndSend("/sub/chat/${roomId}", joinChatMessage)
     }

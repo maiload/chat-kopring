@@ -45,6 +45,12 @@ class MessageConsumer(
         chatService.leaveRoom(payload as ChatRoomDto)
     }
 
+    @RabbitListener(queues = ["\${spring.rabbitmq.oq}"])
+    fun outMessage(message: String) {
+        val (loginId, type, payload) = jsonToMessage(message)
+        chatService.inactiveRoom(payload as ChatRoomDto)
+    }
+
     @RabbitListener(queues = ["\${spring.rabbitmq.sq}"])
     fun sendMessage(message: String) {
         val (loginId, type, payload) = jsonToMessage(message)

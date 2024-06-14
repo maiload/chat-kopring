@@ -28,6 +28,7 @@ class RabbitmqConfig {
     lateinit var dex: String
     lateinit var sq: String
     lateinit var lq: String
+    lateinit var oq: String
     lateinit var iq: String
     lateinit var cq: String
     lateinit var dq: String
@@ -55,6 +56,14 @@ class RabbitmqConfig {
             .build()
 
     @Bean
+    fun outQueue(): Queue =
+        QueueBuilder.durable(oq)
+            .withArgument("x-queue-type", "quorum")
+            .withArgument("x-dead-letter-exchange", deadLetterExchange().name)
+            .withArgument("x-dead-letter-routing-key", deadLetterQueue().name)
+            .build()
+
+    @Bean
     fun inviteQueue(): Queue =
         QueueBuilder.durable(iq)
             .withArgument("x-queue-type", "quorum")
@@ -76,14 +85,14 @@ class RabbitmqConfig {
     @Bean
     fun createBinding(): Binding = BindingBuilder.bind(createQueue()).to(directExchange()).with(createQueue().name)
 
-
     @Bean
     fun leaveBinding(): Binding = BindingBuilder.bind(leaveQueue()).to(directExchange()).with(leaveQueue().name)
 
+    @Bean
+    fun outBinding(): Binding = BindingBuilder.bind(outQueue()).to(directExchange()).with(outQueue().name)
 
     @Bean
     fun inviteBinding(): Binding = BindingBuilder.bind(inviteQueue()).to(directExchange()).with(inviteQueue().name)
-
 
     @Bean
     fun sendBinding(): Binding = BindingBuilder.bind(sendQueue()).to(directExchange()).with(sendQueue().name)

@@ -7,11 +7,12 @@ import org.example.chatkopring.chat.entity.Participant
 import org.example.chatkopring.common.annotation.ValidEnum
 import org.example.chatkopring.common.status.MessageType
 import org.example.chatkopring.common.status.RoomType
+import java.util.UUID
 
 data class ChatRoomDto(
     // TODO : roomId 설정
-//    val roomId: String = UUID.randomUUID().toString(),
-    val roomId: String = "1",
+    val roomId: String = UUID.randomUUID().toString(),
+//    val roomId: String = "1",
 
     @field:NotBlank
     val creator: String,

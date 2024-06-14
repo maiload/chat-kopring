@@ -44,6 +44,7 @@ spring:
     dex: deadLetter.exchange
     cq: create-queue
     lq: leave-queue
+    oq: out-queue
     iq: invite-queue
     sq: send-queue
     dq: deadLetter-queue

@@ -94,6 +94,15 @@
 //    }
 //
 //    /**
+//     * 채팅방 끄기 (INACTIVE)
+//     * @param chatRoomDto(creator, roomType, roomId)
+//     */
+//    @MessageMapping("/chat/outRoom")
+//    fun outRoom(@Payload @Valid chatRoomDto: ChatRoomDto) {
+//        chatService.inactiveRoom(chatRoomDto)
+//    }
+//
+//    /**
 //     * 메세지 전송
 //     * @param chatMessageDto(type, content, sender, roomId)
 //     */
