@@ -36,6 +36,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework.boot:spring-boot-starter-validation:3.2.6")
     implementation("org.springframework.boot:spring-boot-starter-amqp:3.3.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.0")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")

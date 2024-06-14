@@ -35,6 +35,19 @@ spring:
               - email
               - profile
 
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: user
+    password: user
+    ex: chat.exchange
+    dex: deadLetter.exchange
+    cq: create-queue
+    lq: leave-queue
+    iq: invite-queue
+    sq: send-queue
+    dq: deadLetter-queue
+
 logging:
   #  pattern:
   #    console: "[%d{HH:mm:ss.SSS}][%-5level][%logger.%method:line%line] - %msg%n"
