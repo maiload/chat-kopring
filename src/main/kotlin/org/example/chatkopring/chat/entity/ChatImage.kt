@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference
 import jakarta.persistence.*
 
 @Entity
-@Table
 class ChatImage(
     @Column(nullable = false, length = 100)
     val originFileName: String,

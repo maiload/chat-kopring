@@ -7,7 +7,6 @@ import org.example.chatkopring.chat.dto.ChatMessageResponse
 import org.example.chatkopring.common.status.MessageType
 
 @Entity
-@Table
 class ChatMessage(
     @Column(nullable = false, length = 30)
     val sender: String,
@@ -32,7 +31,7 @@ class ChatMessage(
 
     @JsonManagedReference
     @Column(nullable = true)
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "chatMessage", cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "chatMessage")
     val images: List<ChatImage>? = null
 
     fun toChatMessageResponse(base64Image: String?): ChatMessageResponse =

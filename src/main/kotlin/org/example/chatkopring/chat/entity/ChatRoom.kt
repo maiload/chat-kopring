@@ -1,22 +1,11 @@
 package org.example.chatkopring.chat.entity
 
 import com.fasterxml.jackson.annotation.JsonManagedReference
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.FetchType
-import jakarta.persistence.Id
-import jakarta.persistence.OneToMany
-import jakarta.persistence.Table
-import net.minidev.json.annotate.JsonIgnore
-import org.example.chatkopring.chat.dto.ChatMessageDto
+import jakarta.persistence.*
 import org.example.chatkopring.chat.dto.ChatRoomDto
 import org.example.chatkopring.common.status.RoomType
 
 @Entity
-@Table
 class ChatRoom(
     @Id
     @Column(nullable = false, length = 36)
@@ -36,11 +25,11 @@ class ChatRoom(
     var valid: Boolean = true,
 ) {
     @JsonManagedReference
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "chatRoom", cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "chatRoom")
     val chatMessages: List<ChatMessage>? = null
 
     @JsonManagedReference
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "chatRoom", cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "chatRoom")
     val participants: List<Participant>? = null
 
     fun toChatRoomDto(creator: String) = ChatRoomDto(id, creator, roomType, title)

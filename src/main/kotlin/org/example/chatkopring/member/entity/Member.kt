@@ -58,7 +58,7 @@ class Member(
     var state: State = State.PENDING,
 
     ) {
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "member")
+    @OneToMany(mappedBy = "member")
     val memberRole: List<MemberRole>? = null
 
     private fun LocalDate.formatDate(): String =

@@ -3,7 +3,6 @@ package org.example.chatkopring.member.entity
 import jakarta.persistence.*
 
 @Entity
-@Table
 data class Company(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

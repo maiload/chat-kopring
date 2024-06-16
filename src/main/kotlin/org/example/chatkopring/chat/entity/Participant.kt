@@ -6,7 +6,6 @@ import org.example.chatkopring.chat.dto.ChatRoomDto
 import org.example.chatkopring.chat.dto.ParticipantResponse
 
 @Entity
-@Table
 data class Participant(
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
