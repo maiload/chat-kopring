@@ -11,7 +11,7 @@ GET http://localhost:8080/api/member/reissue-token
 Refresh: yJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImV4cCI6MTcxNzc2NTk0MH0.LvEPzYmD-if0FSbNxmLM4ZQkgAWliEmH--Tcu0kWPGE
 
 ### Sign up admin
-POST http://localhost:8080/api/member/signup/admin
+POST http://localhost:8080/api/member/signup
 Content-Type: application/json
 
 {

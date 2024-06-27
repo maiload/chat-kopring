@@ -12,6 +12,7 @@ import org.example.chatkopring.member.dto.MemberResponse
 import org.example.chatkopring.member.service.MemberService
 import org.example.chatkopring.util.logger
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.util.StringUtils
 import org.springframework.web.bind.annotation.*
 
 @RequestMapping("/api/member")
@@ -45,17 +46,13 @@ class MemberController (
      */
     @PostMapping("/signup")
     fun signUp(@RequestBody @Valid memberDto: MemberDto): BaseResponse<Unit> {
-        val resultMsg: String = memberService.signUp(memberDto)
-        return BaseResponse(message = resultMsg)
-    }
-
-    /**
-     * 기업 회원가입
-     */
-    @PostMapping("/signup/admin")
-    fun adminSignUp(@RequestBody @Valid memberDto: MemberDto): BaseResponse<Unit> {
-        memberService.validateAdminSignUp(memberDto)
-        val resultMsg: String = memberService.signUp(memberDto, Role.ADMIN)
+        val resultMsg: String
+        if (StringUtils.hasText(memberDto.businessId)) {
+            memberService.validateAdminSignUp(memberDto)
+            resultMsg = memberService.signUp(memberDto, Role.ADMIN)
+        }else{
+            resultMsg = memberService.signUp(memberDto)
+        }
         return BaseResponse(message = resultMsg)
     }
 
