@@ -82,10 +82,11 @@ class ChatController2(
     }
 
     @ResponseBody
-    @GetMapping("/chat/history")
+    @GetMapping("/api/chat/history")
     fun getChatHistory(@RequestParam roomId: String,
                        @AuthenticationPrincipal customUser: CustomUser): BaseResponse<List<ChatMessageResponse>> {
         val loginId = customUser.username
+        log.info("getChatHistory.loginId : $loginId")
         val state = memberService.searchMyInfo(loginId).state
         require(state == State.APPROVED.name) { throw UnAuthorizationException(loginId, "[$state] 승인되지 않은 사용자입니다.") }
         val chatRoom = chatService.getChatRoomById(roomId) ?: throw InvalidInputException(roomId, "유효하지 않은 roomId 입니다")
@@ -94,9 +95,10 @@ class ChatController2(
     }
 
     @ResponseBody
-    @GetMapping("/chat/rooms")
+    @GetMapping("/api/chat/rooms")
     fun loadAllParticipatedRooms(@AuthenticationPrincipal customUser: CustomUser): BaseResponse<List<ParticipantResponse>> {
         val loginId = customUser.username
+        log.info("loadAllParticipatedRooms.loginId : $loginId")
         val state = memberService.searchMyInfo(loginId).state
         require(state == State.APPROVED.name) { throw UnAuthorizationException(loginId, "[$state] 승인되지 않은 사용자입니다.") }
         val allParticipatedRooms = chatService.loadAllParticipatedRooms(loginId)

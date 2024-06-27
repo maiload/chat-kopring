@@ -31,7 +31,7 @@ class SecurityConfig (
             .authorizeHttpRequests {
                 it.requestMatchers("/api/member/signup/**", "/api/member/login/**", "api/member/reissue-token").anonymous()
                     .requestMatchers("/api/member/admin/**").hasRole("ADMIN")
-                    .requestMatchers("/api/member/**", "/chat/**").hasAnyRole("MEMBER", "OAUTH_MEMBER", "ADMIN")
+                    .requestMatchers("/api/member/**", "/api/chat/**").hasAnyRole("MEMBER", "OAUTH_MEMBER", "ADMIN")
                     .anyRequest().permitAll()
             }
             .addFilter(corsFilter())
@@ -40,7 +40,8 @@ class SecurityConfig (
                 UsernamePasswordAuthenticationFilter::class.java
             )
             .oauth2Login {
-                it.loginPage("/login")
+                it
+//                    .loginPage("/login")
                     .userInfoEndpoint { u -> u.userService(customOath2UserService) }
                     .successHandler(oAuth2SuccessHandler)
             }

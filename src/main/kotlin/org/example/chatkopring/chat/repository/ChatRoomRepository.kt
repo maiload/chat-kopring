@@ -29,13 +29,6 @@ interface ChatMessageRepository: JpaRepository<ChatMessage, Long> {
     @Query("SELECT cm FROM ChatMessage cm WHERE cm.chatRoom.id = :roomId And cm.sender = :sender ORDER BY cm.id DESC")
     fun findFirstByRoomIdOrderByIdDesc(@Param("roomId") roomId: String, @Param("sender") sender: String, pageable: Pageable): List<ChatMessage>
 
-//    @Query("SELECT cm FROM ChatMessage cm WHERE cm.chatRoom.id = :roomId AND cm.id >= :id ORDER BY cm.id DESC")
-//    fun findByRoomIdAndMessageIdGreaterThanEqual(@Param("roomId") roomId: String, @Param("id") id: Long, pageable: Pageable): List<ChatMessage>
-//
-//    @Query("SELECT cm FROM ChatMessage cm WHERE cm.chatRoom.id = :roomId AND cm.type = :type And cm.sender = :sender ORDER BY cm.id DESC")
-//    fun findFirstByRoomIdAndTypeOrderByIdDesc(@Param("roomId") roomId: String, @Param("type") type: MessageType, @Param("sender") sender: String, pageable: Pageable): List<ChatMessage>?
-
-
 }
 
 interface ChatImageRepository: JpaRepository<ChatImage, Long> {

@@ -53,7 +53,7 @@ class MemberService(
         // ID 중복 검사
         var member: Member? = memberRepository.findByLoginId(memberDto.loginId)
         if (member != null) {
-            throw InvalidInputException("loginId", "이미 등록된 ID 입니다.")
+            throw InvalidInputException(memberDto.loginId, "이미 등록된 ID 입니다.")
         }
 
         val originPw = memberDto.password
