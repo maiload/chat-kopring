@@ -34,13 +34,21 @@ class ChatService(
 ) {
     val log = logger()
 
-    fun createRoom(chatRoomDto: ChatRoomDto) {
-        chatRoomRepository.save(chatRoomDto.toEntity())
-        val createChatMessage = chatRoomDto.makeChatMessage(MessageType.CREATE)
-        chatMessageRepository.save(createChatMessage)
-        messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(createChatMessage.type, createChatMessage.sender, chatRoomDto.roomId))
-        messagingTemplate.convertAndSend("/sub/chat/${chatRoomDto.roomId}", createChatMessage)
+    fun createRoom(chatRoomDto: ChatRoomDto): Boolean {
+        if (roomIdValidate(chatRoomDto.roomId)) {
+            sendErrorMessage(chatRoomDto.toErrorMessage("이미 존재하는 roomId 입니다."))
+            return false;
+        }else{
+            chatRoomRepository.save(chatRoomDto.toEntity())
+            val createChatMessage = chatRoomDto.makeChatMessage(MessageType.CREATE)
+            chatMessageRepository.save(createChatMessage)
+            messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(createChatMessage.type, createChatMessage.sender, chatRoomDto.roomId))
+            messagingTemplate.convertAndSend("/sub/chat/${chatRoomDto.roomId}", createChatMessage)
+            return true;
+        }
     }
+
+    fun roomIdValidate(roomId: String): Boolean = chatRoomRepository.existsById(roomId)
 
 
     fun isPrivateRoomExist(creator: String, receiver: String, chatRoomDto: ChatRoomDto): String? {
@@ -98,7 +106,7 @@ class ChatService(
             messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(chatMessageDto.type, chatMessageDto.sender, chatMessageDto.roomId))
             log.info("${chatMessageDto.sender} sent message to room (${chatMessageDto.roomId})")
         }else{
-            sendErrorMessage(ErrorMessage("입장중인 방이 아니거나 Active 되지 않았습니다.", creator, roomId))
+            sendErrorMessage(chatRoomDto.toErrorMessage("입장중인 방이 아니거나 Active 되지 않았습니다."))
         }
     }
 
@@ -128,7 +136,7 @@ class ChatService(
             chatMessageRepository.save(chatRoomDto.makeChatMessage(MessageType.INACTIVE))
             messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.INACTIVE, creator, roomId))
         }else{
-            sendErrorMessage(ErrorMessage("입장중인 방이 아니거나 이미 INACTIVE 상태 입니다.", creator, roomId))
+            sendErrorMessage(chatRoomDto.toErrorMessage("입장중인 방이 아니거나 이미 INACTIVE 상태 입니다."))
         }
     }
 
@@ -185,7 +193,7 @@ class ChatService(
             }
             messagingTemplate.convertAndSend("/sub/chat/${roomId}", leaveChatMessage)
         }else{
-            sendErrorMessage(ErrorMessage("입장중인 방이 아닙니다.", creator, roomId))
+            sendErrorMessage(chatRoomDto.toErrorMessage("입장중인 방이 아닙니다."))
         }
     }
 

@@ -68,14 +68,15 @@ class MessageConsumer(
         if (member.role != Role.ADMIN.name || chatRoomDto.creator != loginId) {
             sendErrorMessage(ErrorMessage("Admin 사용자만 전체 채팅방을 만들 수 있습니다.", creator, roomId))
         }else{
-            chatService.createRoom(chatRoomDto)
-            val members = memberService.findColleague(member.id)
-            // ADMIN -> 전체 참여(생성자 포함)
-            members.forEach {
-                val roomDto = ChatRoomDto(roomId, it.loginId, roomType)
-                chatService.joinRoom(roomDto)
-                if (it.loginId != loginId) chatService.inactiveRoom(roomDto)
-                else chatService.activeRoom(chatRoomDto)
+            if (chatService.createRoom(chatRoomDto)){
+                val members = memberService.findColleague(member.id)
+                // ADMIN -> 전체 참여(생성자 포함)
+                members.forEach {
+                    val roomDto = ChatRoomDto(roomId, it.loginId, roomType)
+                    chatService.joinRoom(roomDto)
+                    if (it.loginId != loginId) chatService.inactiveRoom(roomDto)
+                    else chatService.activeRoom(chatRoomDto)
+                }
             }
         }
     }
@@ -87,15 +88,16 @@ class MessageConsumer(
         if (chatRoomDto.participant.isNullOrEmpty()) {
             sendErrorMessage(ErrorMessage("Group 채팅방은 creator 를 제외한 참여자가 1명 이상이어야 합니다.", creator, roomId))
         }else{
-            chatService.createRoom(chatRoomDto)
-            // 방 생성자 JOIN
-            chatService.joinRoom(chatRoomDto)
-            chatService.activeRoom(chatRoomDto)
-            // 참여자 강제 JOIN
-            chatRoomDto.participant.forEach {
-                val roomDto = ChatRoomDto(roomId, it, roomType)
-                chatService.joinRoom(roomDto)
-                chatService.inactiveRoom(roomDto)
+            if(chatService.createRoom(chatRoomDto)) {
+                // 방 생성자 JOIN
+                chatService.joinRoom(chatRoomDto)
+                chatService.activeRoom(chatRoomDto)
+                // 참여자 강제 JOIN
+                chatRoomDto.participant.forEach {
+                    val roomDto = ChatRoomDto(roomId, it, roomType)
+                    chatService.joinRoom(roomDto)
+                    chatService.inactiveRoom(roomDto)
+                }
             }
         }
     }
@@ -119,14 +121,15 @@ class MessageConsumer(
                 // 재입장 활성화 or 활성화
                 chatService.activeRoom(chatRoomDto)
             }else{
-                chatService.createRoom(chatRoomDto)
-                // 생성자 JOIN
-                chatService.joinRoom(chatRoomDto)
-                chatService.activeRoom(chatRoomDto)
-                // 상대방 강제 JOIN
-                val roomDto = ChatRoomDto(roomId, receiver, roomType, title)
-                chatService.joinRoom(roomDto)
-                chatService.inactiveRoom(roomDto)
+                if (chatService.createRoom(chatRoomDto)) {
+                    // 생성자 JOIN
+                    chatService.joinRoom(chatRoomDto)
+                    chatService.activeRoom(chatRoomDto)
+                    // 상대방 강제 JOIN
+                    val roomDto = ChatRoomDto(roomId, receiver, roomType, title)
+                    chatService.joinRoom(roomDto)
+                    chatService.inactiveRoom(roomDto)
+                }
             }
         }
     }

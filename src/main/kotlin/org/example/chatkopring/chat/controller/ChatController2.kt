@@ -25,6 +25,7 @@ import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
@@ -48,25 +49,21 @@ class ChatController2(
 
     @EventListener
     fun handleWebSocketConnectListener(event: SessionConnectEvent) {
-        val user = StompHeaderAccessor.wrap(event.message).user
-        log.info("New Connection : $user")
-        if(user != null) {
-            userSessionRegistry.registerSession(user.name)
-            messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.CONNECT, user.name))
-        }
+        val user = (StompHeaderAccessor.wrap(event.message).user as UsernamePasswordAuthenticationToken).principal as CustomUser
+        log.info("New Connection : ${user.username} ${user.authorities}")
+        userSessionRegistry.registerSession(user.name)
+        messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.CONNECT, user.name))
     }
 
     @EventListener
     fun handleWebSocketDisconnectListener(event: SessionDisconnectEvent) {
-        val user = StompHeaderAccessor.wrap(event.message).user
-        log.info("User Disconnected : $user")
-        if(user != null) {
-            userSessionRegistry.removeSession(user.name)
-            messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.DISCONNECT, user.name))
-            // 모든 방 INACTIVE
-            val allParticipatedRooms = chatService.loadAllParticipatedRooms(user.name)
-            allParticipatedRooms?.forEach { chatService.inactiveRoom(it.toChatRoomDto()) }
-        }
+        val user = (StompHeaderAccessor.wrap(event.message).user as UsernamePasswordAuthenticationToken).principal as CustomUser
+        log.info("User Disconnected : ${user.username} ${user.authorities}")
+        userSessionRegistry.removeSession(user.name)
+        messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.DISCONNECT, user.name))
+        // 모든 방 INACTIVE
+        val allParticipatedRooms = chatService.loadAllParticipatedRooms(user.name)
+        allParticipatedRooms?.forEach { chatService.inactiveRoom(it.toChatRoomDto()) }
     }
 
     @EventListener
