@@ -69,13 +69,13 @@ class ChatController2(
     @EventListener
     fun handleWebSocketUnsubscribeListener(event: SessionUnsubscribeEvent) {
         val headerAccessor = StompHeaderAccessor.wrap(event.message)
-        log.info("User Unsubscribed : ${headerAccessor.user?.name}, Destination : ${headerAccessor.destination}")
+        log.info("[${headerAccessor.user?.name}] Unsubscribed, Destination : ${headerAccessor.destination}")
     }
 
     @EventListener
     fun handleWebSocketSubscribeListener(event: SessionSubscribeEvent) {
         val headerAccessor = StompHeaderAccessor.wrap(event.message)
-        log.info("User Subscribed : ${headerAccessor.user?.name}, Destination : ${headerAccessor.destination}")
+        log.info("[${headerAccessor.user?.name}] Subscribed, Destination : ${headerAccessor.destination}")
     }
 
     @ResponseBody
@@ -83,11 +83,11 @@ class ChatController2(
     fun getChatHistory(@RequestParam roomId: String,
                        @AuthenticationPrincipal customUser: CustomUser): BaseResponse<List<ChatMessageResponse>> {
         val loginId = customUser.username
-        log.info("getChatHistory.loginId : $loginId")
         val state = memberService.searchMyInfo(loginId).state
         require(state == State.APPROVED.name) { throw UnAuthorizationException(loginId, "[$state] 승인되지 않은 사용자입니다.") }
         val chatRoom = chatService.getChatRoomById(roomId) ?: throw InvalidInputException(roomId, "유효하지 않은 roomId 입니다")
         val response = chatService.getChatHistory(chatRoom, loginId)
+        log.info("[$loginId] Request ChatHistory : ${response.size}")
         return BaseResponse(data = response)
     }
 
@@ -95,11 +95,11 @@ class ChatController2(
     @GetMapping("/api/chat/rooms")
     fun loadAllParticipatedRooms(@AuthenticationPrincipal customUser: CustomUser): BaseResponse<List<ParticipantResponse>> {
         val loginId = customUser.username
-        log.info("loadAllParticipatedRooms.loginId : $loginId")
         val state = memberService.searchMyInfo(loginId).state
         require(state == State.APPROVED.name) { throw UnAuthorizationException(loginId, "[$state] 승인되지 않은 사용자입니다.") }
         val allParticipatedRooms = chatService.loadAllParticipatedRooms(loginId)
         val response = allParticipatedRooms?.map { it.toResponse() }
+        log.info("[$loginId] Request Participated Rooms : ${response?.size ?: 0}")
         return BaseResponse(data = response,
             message = if (response.isNullOrEmpty()) "현재 참여중인 방이 없습니다." else "${response.size}개의 채팅방을 불러왔습니다.")
     }

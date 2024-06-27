@@ -1,5 +1,6 @@
 package org.example.chatkopring.member.entity
 
+import com.fasterxml.jackson.annotation.JsonBackReference
 import jakarta.persistence.*
 import org.example.chatkopring.common.status.Gender
 import org.example.chatkopring.common.status.Role
@@ -65,10 +66,10 @@ class Member(
         this.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
 
     fun toResponseDto(): MemberResponse =
-        MemberResponse(id!!, loginId, name, birthDate.formatDate(), gender.desc, email, memberRole!!.first().role.name, companyCode, state.name, profile)
+        MemberResponse(id!!, loginId, name, birthDate.formatDate(), gender.name, email, memberRole!!.first().role.name, companyCode, state.name, profile)
 
     fun toDto(): MemberDto =
-        MemberDto(id!!, loginId, password, name, birthDate.formatDate(), gender.desc, email)
+        MemberDto(id!!, loginId, password, name, birthDate.formatDate(), gender.name, email)
 
     override fun toString(): String {
         return "Member(id=$id, loginId='$loginId', password='$password', name='$name', birthDate=$birthDate, gender=$gender, email='$email', " +

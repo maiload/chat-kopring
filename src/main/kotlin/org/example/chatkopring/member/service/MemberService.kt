@@ -5,6 +5,7 @@ import org.example.chatkopring.chat.repository.ChatRoomRepository
 import org.example.chatkopring.chat.repository.ParticipantRepository
 import org.example.chatkopring.common.authority.JwtTokenProvider
 import org.example.chatkopring.common.authority.TokenInfo
+import org.example.chatkopring.common.dto.CustomUser
 import org.example.chatkopring.common.exception.InvalidInputException
 import org.example.chatkopring.common.exception.UnAuthorizationException
 import org.example.chatkopring.common.status.Role
@@ -107,7 +108,9 @@ class MemberService(
     fun reissueToken(refreshToken: String): TokenInfo {
         validateRefreshToken(refreshToken)
         val authentication = jwtTokenProvider.getAuthentication(refreshToken)
+        val user = authentication.principal as CustomUser
         blackListRepository.save(BlackList(refreshToken))
+        log.info("[${user.username}] Request Reissue Token")
         return jwtTokenProvider.createToken(authentication)
     }
 
@@ -122,7 +125,8 @@ class MemberService(
         val authenticationToken = UsernamePasswordAuthenticationToken(loginDto.loginId, member.password)
         val authentication = authenticationManagerBuilder.`object`.authenticate(authenticationToken)
         val tokenInfo = jwtTokenProvider.createToken(authentication)
-        return mapOf("tokenInfo" to tokenInfo, "state" to member.state, "companyCode" to member.companyCode)
+        return mapOf("tokenInfo" to tokenInfo, "role" to member.memberRole?.first()?.role,
+            "state" to member.state, "companyCode" to member.companyCode)
     }
 
     /**
@@ -141,7 +145,7 @@ class MemberService(
     }
 
     fun searchEmployeeInfo(companyCode: String): List<MemberResponse> {
-        val members: List<Member> = memberRepository.findByCompanyCode(companyCode)
+        val members: List<Member> = memberRepository.findByCompanyCodeAndStateNot(companyCode, State.DENIED)
             ?: throw InvalidInputException("companyCode", "companyCode(${companyCode})로 등록된 회원이 존재하지 않습니다.")
         return members.map { it.toResponseDto() }
     }
@@ -150,10 +154,11 @@ class MemberService(
      * 내 정보 수정
      */
     fun saveMyInfo(memberDto: MemberDto, role: String): String {
-        val savedPw = memberRepository.findByLoginId(memberDto.loginId)?.password
+        val savedMember = memberRepository.findByLoginId(memberDto.loginId)
             ?: throw InvalidInputException("loginId", "존재하지 않는 ID(${memberDto.loginId}) 입니다")
+        require(memberDto.id == savedMember.id) { throw InvalidInputException("id", "[${memberDto.loginId}] 회원 정보의 id(PK)가 일치하지 않습니다.") }
 //        if(role == Role.MEMBER.name) require(passwordEncoder.matches(memberDto.password, savedPw)) { "비밀번호를 다시 확인하세요." }
-        val member: Member = memberDto.toEntity(savedPw, role)
+        val member: Member = memberDto.toEntity(savedMember.password, role)
         memberRepository.save(member)
         return "수정 완료되었습니다."
     }

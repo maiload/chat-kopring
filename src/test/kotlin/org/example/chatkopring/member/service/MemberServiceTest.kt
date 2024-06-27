@@ -41,7 +41,8 @@ class MemberServiceTest{
             name = memberDto.name,
             birthDate = memberDto.birthDate,
             gender = memberDto.gender,
-            email = memberDto.email
+            email = memberDto.email,
+            profile = "안녕하세요"
         )
         Mockito.`when`(memberRepository.findByLoginId("john_doe")).thenReturn(existingMember)
 

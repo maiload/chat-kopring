@@ -10,7 +10,7 @@ interface MemberRepository: JpaRepository<Member, Long> {
     fun findByLoginId(loginId: String): Member?
     fun findByEmail(email: String): Member?
     fun existsByBusinessId(businessId: String): Boolean
-    fun findByCompanyCode(companyCode: String): List<Member>?
+    fun findByCompanyCodeAndStateNot(companyCode: String, state: State): List<Member>?
     fun findByCompanyCodeAndState(companyCode: String, state: State): List<Member>
 }
 

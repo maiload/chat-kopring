@@ -1,5 +1,36 @@
 version: "3.8"
 services:
+  kopring:
+    restart: on-failure
+    container_name: chat-kopring
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/chat
+      - SPRING_DATASOURCE_USERNAME=jin
+      - SPRING_DATASOURCE_PASSWORD=jin123
+      - RABBITMQ_HOST=localhost
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=user
+      - RABBITMQ_PASSWORD=user
+    depends_on:
+      - mysql
+      - haproxy
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql-chat
+    environment:
+      MYSQL_ROOT_PASSWORD: maiload
+      MYSQL_DATABASE: chat
+      MYSQL_USER: jin
+      MYSQL_PASSWORD: jin123
+    ports:
+      - "3306:3306"
+#    volumes:
+#      - ./data/:/var/lib/mysql
+
   rabbit1:
     image: rabbitmq:management
     container_name: rabbit1
