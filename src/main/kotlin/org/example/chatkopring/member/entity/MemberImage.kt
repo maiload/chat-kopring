@@ -1,10 +1,9 @@
-package org.example.chatkopring.chat.entity
+package org.example.chatkopring.member.entity
 
-import com.fasterxml.jackson.annotation.JsonBackReference
 import jakarta.persistence.*
 
 @Entity
-class ChatImage(
+class MemberImage(
     @Column(nullable = false, length = 100)
     val originFileName: String,
 
@@ -14,12 +13,11 @@ class ChatImage(
     @Column(nullable = false)
     val fileSize: Long,
 
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(foreignKey = ForeignKey(name = "fk_chat_image_chatMessage_id"))
-    val chatMessage: ChatMessage,
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null
+
+    @OneToOne(mappedBy = "memberImage")
+    val member: Member? = null
 }

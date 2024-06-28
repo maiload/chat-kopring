@@ -3,7 +3,6 @@ package org.example.chatkopring.member.dto
 import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.Null
 import jakarta.validation.constraints.Pattern
 import org.example.chatkopring.common.annotation.ValidEnum
 import org.example.chatkopring.common.status.Gender
@@ -57,7 +56,7 @@ data class MemberDto(
     private val _email: String?,
 
     @JsonProperty("profile")
-    private val _profile: String? = "안녕하세요!",
+    private val _profile: String? = null,
 
     @JsonProperty("companyCode")
     private val _companyCode: String? = null,
@@ -106,13 +105,14 @@ data class MemberDto(
     val state: State
         get() = State.valueOf(_state!!)
     val profile: String
-        get() = _profile!!
+        get() = _profile ?: "안녕하세요!"
 
 
-    fun toEntity(password: String, role: String): Member =
-        if (role == Role.ADMIN.name) Member(id, loginId, password, name, birthDate, gender, email, profile,
+    fun toEntity(password: String, role: String): Member {
+        return if (role == Role.ADMIN.name) Member(id, loginId, password, name, birthDate, gender, email, profile,
             companyCode, ceoName, companyName, businessId, companyCertificateNumber)
         else Member(id, loginId, password, name, birthDate, gender, email, profile, companyCode)
+    }
 
     private fun String.toLocalDate(): LocalDate =
         LocalDate.parse(this, DateTimeFormatter.ofPattern("yyyy-MM-dd"))

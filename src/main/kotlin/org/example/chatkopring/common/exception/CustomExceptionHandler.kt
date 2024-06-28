@@ -1,5 +1,6 @@
 package org.example.chatkopring.common.exception
 
+import org.apache.tomcat.util.http.fileupload.impl.InvalidContentTypeException
 import org.example.chatkopring.common.dto.BaseResponse
 import org.example.chatkopring.common.status.ResultCode
 import org.springframework.http.HttpStatus
@@ -45,11 +46,21 @@ class CustomExceptionHandler {
         val errors = mapOf(ex.loginId to ex.message)
         return ResponseEntity(BaseResponse(ResultCode.ERROR.name, errors, ex.message), HttpStatus.BAD_REQUEST)
     }
-
-    @ExceptionHandler(Exception::class)
-    protected fun defaultException(ex: Exception): ResponseEntity<BaseResponse<Map<String, String>>> {
-        val message = ex.message ?: "Not Exception Message"
-        val errors = mapOf("미처리 에러" to message)
-        return ResponseEntity(BaseResponse(ResultCode.ERROR.name, errors, message), HttpStatus.BAD_REQUEST)
+    
+    @ExceptionHandler(IllegalArgumentException::class)
+    protected fun illegalArgumentException(ex: IllegalArgumentException): ResponseEntity<BaseResponse<Map<String, String>>> {
+        return ResponseEntity(BaseResponse(ResultCode.ERROR.name, null, ex.message ?: "미처리 에러"), HttpStatus.BAD_REQUEST)
     }
+
+    @ExceptionHandler(InvalidContentTypeException::class)
+    protected fun invalidContentTypeException(ex: InvalidContentTypeException): ResponseEntity<BaseResponse<Map<String, String>>> {
+        return ResponseEntity(BaseResponse(ResultCode.ERROR.name, null, ex.message ?: "Content-Type 에러"), HttpStatus.BAD_REQUEST)
+    }
+
+//    @ExceptionHandler(Exception::class)
+//    protected fun defaultException(ex: Exception): ResponseEntity<BaseResponse<Map<String, String>>> {
+//        val message = ex.message ?: "Not Exception Message"
+//        val errors = mapOf("미처리 에러" to message)
+//        return ResponseEntity(BaseResponse(ResultCode.ERROR.name, errors, message), HttpStatus.BAD_REQUEST)
+//    }
 }

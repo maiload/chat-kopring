@@ -11,9 +11,12 @@ import org.example.chatkopring.member.dto.MemberDto
 import org.example.chatkopring.member.dto.MemberResponse
 import org.example.chatkopring.member.service.MemberService
 import org.example.chatkopring.util.logger
+import org.springframework.core.io.Resource
+import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.util.StringUtils
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 
 @RequestMapping("/api/member")
 @RestController
@@ -79,20 +82,30 @@ class MemberController (
     @GetMapping("/info")
     fun searchMyInfo(@AuthenticationPrincipal customUser: CustomUser): BaseResponse<MemberResponse> {
         val response = memberService.searchMyInfo(customUser.userId)
+        log.info("[${customUser.username}] Request Member Info")
         return BaseResponse(data = response)
+    }
+
+    /**
+     * 프로필 사진 요청
+     */
+    @GetMapping("/info/image")
+    fun searchMyInfoWithImage(@AuthenticationPrincipal customUser: CustomUser): ResponseEntity<Any> {
+        return memberService.searchMyInfoWithImage(customUser.userId)
     }
 
     /**
      * 내 정보 수정
      */
     @PutMapping("/info")
-    fun saveMyInfo(@RequestBody @Valid memberDto: MemberDto,
+    fun saveMyInfo(@RequestPart(name = "image", required = false) image: MultipartFile?,
+                   @RequestPart("member") @Valid memberDto: MemberDto,
                    @AuthenticationPrincipal customUser: CustomUser): BaseResponse<Unit> {
         requireNotNull(memberDto.id) { "id가 null 입니다." }
         require(memberDto.id == customUser.userId) { "AccessToken의 id와 입력된 id가 일치하지 않습니다." }
         memberDto.companyCode?.let { memberService.validateCompanyCode(it) }
         val authorityRole = customUser.authorities.first().authority    // = SimpleGrantedAuthority.authority
-        val resultMsg: String = memberService.saveMyInfo(memberDto, authorityRole.substring("ROLE_".length))
+        val resultMsg: String = memberService.saveMyInfo(memberDto, authorityRole.substring("ROLE_".length), image)
         return BaseResponse(message = resultMsg)
     }
 

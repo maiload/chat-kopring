@@ -31,7 +31,7 @@ class ChatMessage(
 
     @JsonManagedReference
     @Column(nullable = true)
-    @OneToMany(mappedBy = "chatMessage")
+    @OneToMany(mappedBy = "chatMessage", cascade = [CascadeType.ALL], orphanRemoval = true)
     val images: List<ChatImage>? = null
 
     fun toChatMessageResponse(base64Image: String?): ChatMessageResponse =

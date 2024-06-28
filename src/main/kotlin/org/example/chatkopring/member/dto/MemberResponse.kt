@@ -1,5 +1,7 @@
 package org.example.chatkopring.member.dto
 
+import org.springframework.core.io.Resource
+
 data class MemberResponse(
     val id: Long,
     val loginId: String,

@@ -7,6 +7,7 @@ import org.example.chatkopring.common.status.Role
 import org.example.chatkopring.common.status.State
 import org.example.chatkopring.member.dto.MemberDto
 import org.example.chatkopring.member.dto.MemberResponse
+import org.springframework.core.io.Resource
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -61,6 +62,10 @@ class Member(
     ) {
     @OneToMany(mappedBy = "member")
     val memberRole: List<MemberRole>? = null
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+    @JoinColumn(foreignKey = ForeignKey(name = "fk_member_image_memberImage_id"))
+    var memberImage: MemberImage? = null
 
     private fun LocalDate.formatDate(): String =
         this.format(DateTimeFormatter.ofPattern("yyyyMMdd"))

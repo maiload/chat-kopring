@@ -10,6 +10,7 @@ import org.example.chatkopring.chat.repository.ChatMessageRepository
 import org.example.chatkopring.chat.repository.ChatRoomRepository
 import org.example.chatkopring.chat.repository.ParticipantRepository
 import org.example.chatkopring.common.exception.InvalidInputException
+import org.example.chatkopring.common.service.ImageService
 import org.example.chatkopring.common.status.MessageType
 import org.example.chatkopring.common.status.RoomType
 import org.example.chatkopring.util.logger
@@ -18,10 +19,13 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 import kotlin.jvm.optionals.getOrNull
 
-const val OUTPUT_PATH: String = "src/main/resources/images/"
+const val CHAT_IMAGE_OUTPUT_PATH: String = "src/main/resources/images/chat/"
 
 @Transactional
 @Service
@@ -31,6 +35,7 @@ class ChatService(
     private val chatImageRepository: ChatImageRepository,
     private val participantRepository: ParticipantRepository,
     private val messagingTemplate: SimpMessagingTemplate,
+    private val imageService: ImageService,
 ) {
     val log = logger()
 
@@ -85,11 +90,7 @@ class ChatService(
             val chatMessage = chatRoomDto.makeChatMessage(chatMessageDto.type)
             // 이미지 처리
             if (chatMessageDto.type == MessageType.IMAGE){
-                requireNotNull(chatMessageDto.image)
-                val originFilename = chatMessageDto.content
-                val storageFilename = originFilename.generateStorageFileName()
-                val chatImage = ChatImage(originFilename, storageFilename, chatMessage)
-                saveBase64Image(chatMessageDto.image, OUTPUT_PATH + storageFilename)
+                val chatImage = imageService.uploadChatImage(chatMessageDto, chatMessage)
                 chatImageRepository.save(chatImage)
             }
 
@@ -110,13 +111,7 @@ class ChatService(
         }
     }
 
-    fun saveBase64Image(base64Image: String, outputPath: String) {
-        val imageBytes = Base64.getDecoder().decode(base64Image)
-        FileOutputStream(outputPath).use { outputStream ->
-            outputStream.write(imageBytes)
-            outputStream.flush()
-        }
-    }
+
 
     fun activeRoom(chatRoomDto: ChatRoomDto) {
         // INACTIVE ChatMessage 삭제
@@ -216,30 +211,13 @@ class ChatService(
                 var base64Image: String? = null
                 if (it.type == MessageType.IMAGE) {
                     val storageFilename = chatImageRepository.findByChatMessage(it).storageFileName
-                    base64Image = encodeImageToBase64(storageFilename)
+                    base64Image = imageService.encodeImageToBase64(storageFilename)
                 }
                 it.toChatMessageResponse(base64Image)
             }
     }
 
     fun getChatRoomById(roomId: String) = chatRoomRepository.findById(roomId).getOrNull()
-
-    fun String.generateStorageFileName(): String {
-        val currentTimeMillisString = System.currentTimeMillis().toString()
-        val parts = this.split('.')
-        val fileName = parts.firstOrNull() ?: ""
-        val extension = parts.lastOrNull() ?: ""
-        return "$fileName-${currentTimeMillisString}.$extension"
-    }
-
-    fun encodeImageToBase64(storageFileName: String): String? {
-        val file = File(OUTPUT_PATH + storageFileName)
-        file.inputStream().use { inputStream ->
-            val bytes = inputStream.readBytes()
-
-            return Base64.getEncoder().encodeToString(bytes)
-        }
-    }
 
     fun sendErrorMessage(errorMessage: ErrorMessage?) {
         log.error("WebSocketError : $errorMessage")

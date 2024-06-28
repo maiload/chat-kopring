@@ -1,10 +1,10 @@
 package org.example.chatkopring.chat.repository
 
-import org.example.chatkopring.common.status.MessageType
 import org.example.chatkopring.chat.entity.ChatImage
 import org.example.chatkopring.chat.entity.ChatMessage
 import org.example.chatkopring.chat.entity.ChatRoom
 import org.example.chatkopring.chat.entity.Participant
+import org.example.chatkopring.common.status.MessageType
 import org.example.chatkopring.common.status.RoomType
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.EntityGraph
@@ -33,6 +33,7 @@ interface ChatMessageRepository: JpaRepository<ChatMessage, Long> {
 
 interface ChatImageRepository: JpaRepository<ChatImage, Long> {
     fun findByChatMessage(chatMessage: ChatMessage): ChatImage
+    fun findByOriginFileNameAndFileSize(originFileName: String, fileSize: Long): List<ChatImage>
 }
 
 interface ParticipantRepository: JpaRepository<Participant, Long> {

@@ -29,7 +29,7 @@ class ChatRoom(
     val chatMessages: List<ChatMessage>? = null
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "chatRoom")
+    @OneToMany(mappedBy = "chatRoom", cascade = [CascadeType.ALL], orphanRemoval = true)
     val participants: List<Participant>? = null
 
     fun toChatRoomDto(creator: String) = ChatRoomDto(id, creator, roomType, title)

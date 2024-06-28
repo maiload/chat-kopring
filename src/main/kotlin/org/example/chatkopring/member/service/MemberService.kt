@@ -1,6 +1,7 @@
 package org.example.chatkopring.member.service
 
 import jakarta.transaction.Transactional
+import org.apache.coyote.Response
 import org.example.chatkopring.chat.repository.ChatRoomRepository
 import org.example.chatkopring.chat.repository.ParticipantRepository
 import org.example.chatkopring.common.authority.JwtTokenProvider
@@ -8,6 +9,7 @@ import org.example.chatkopring.common.authority.TokenInfo
 import org.example.chatkopring.common.dto.CustomUser
 import org.example.chatkopring.common.exception.InvalidInputException
 import org.example.chatkopring.common.exception.UnAuthorizationException
+import org.example.chatkopring.common.service.ImageService
 import org.example.chatkopring.common.status.Role
 import org.example.chatkopring.common.status.RoomType
 import org.example.chatkopring.common.status.State
@@ -22,13 +24,28 @@ import org.example.chatkopring.member.repository.CompanyRepository
 import org.example.chatkopring.member.repository.MemberRepository
 import org.example.chatkopring.member.repository.MemberRoleRepository
 import org.example.chatkopring.util.logger
+import org.springframework.core.io.FileSystemResource
+import org.springframework.core.io.Resource
+import org.springframework.core.io.UrlResource
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import kotlin.jvm.optionals.getOrNull
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.util.UriUtils
+import java.io.File
+import java.nio.file.Paths
+import javax.print.attribute.standard.Media
+
+const val PROFILE_IMAGE_OUTPUT_PATH: String = "src/main/resources/images/profile/"
 
 @Transactional
 @Service
@@ -41,6 +58,7 @@ class MemberService(
     private val chatRoomRepository: ChatRoomRepository,
     private val authenticationManagerBuilder: AuthenticationManagerBuilder,
     private val jwtTokenProvider: JwtTokenProvider,
+    private val imageService: ImageService,
 ) {
     val log = logger()
     val passwordEncoder: PasswordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder()
@@ -138,6 +156,26 @@ class MemberService(
         return member.toResponseDto()
     }
 
+    fun searchMyInfoWithImage(id: Long): ResponseEntity<Any> {
+        val member: Member = memberRepository.findByIdOrNull(id)
+            ?: throw InvalidInputException("id", "회원번호(${id})가 존재하지 않는 유저입니다.")
+        val profileImage = member.memberImage
+
+        return if(profileImage != null){
+            val file = Paths.get(PROFILE_IMAGE_OUTPUT_PATH + profileImage.storageFileName)
+            val resource = UrlResource(file.toUri())
+            val filename = UriUtils.encode(profileImage.originFileName, "UTF-8")
+            log.info("[${member.loginId}] Request Profile Image ($filename)")
+            return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; fileName=\"$filename\";")
+                .body(resource)
+        } else {
+            ResponseEntity.ok().body("프로필 이미지가 없습니다.")
+        }
+    }
+
+
     fun searchMyInfo(loginId: String): MemberResponse {
         val member: Member = memberRepository.findByLoginId(loginId)
             ?: throw InvalidInputException("id", "회원 아이디(${loginId})가 존재하지 않는 유저입니다.")
@@ -153,15 +191,26 @@ class MemberService(
     /**
      * 내 정보 수정
      */
-    fun saveMyInfo(memberDto: MemberDto, role: String): String {
+    fun saveMyInfo(memberDto: MemberDto, role: String, image: MultipartFile?): String {
         val savedMember = memberRepository.findByLoginId(memberDto.loginId)
             ?: throw InvalidInputException("loginId", "존재하지 않는 ID(${memberDto.loginId}) 입니다")
         require(memberDto.id == savedMember.id) { throw InvalidInputException("id", "[${memberDto.loginId}] 회원 정보의 id(PK)가 일치하지 않습니다.") }
 //        if(role == Role.MEMBER.name) require(passwordEncoder.matches(memberDto.password, savedPw)) { "비밀번호를 다시 확인하세요." }
         val member: Member = memberDto.toEntity(savedMember.password, role)
+        var message = ""
+        val memberImage = if (image != null) {
+            message = " with Profile Image (${image.originalFilename})"
+            imageService.uploadImage(image, member)
+        } else {
+            imageService.deleteImage(member)
+            null
+        }
+        member.memberImage = memberImage
         memberRepository.save(member)
+        log.info("[${memberDto.loginId}] Update Member Info$message")
         return "수정 완료되었습니다."
     }
+
 
     /**
      * state 변경

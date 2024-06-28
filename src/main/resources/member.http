@@ -70,19 +70,20 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX
 ### info update
 
 PUT http://localhost:8080/api/member/info
-Content-Type: application/json
+Content-Type: multipart/form-data
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjIsImlhdCI6MTcxOTQ4MzQzMCwiZXhwIjoxNzE5NTY5ODMwfQ.97-vovEr3peeChhmX5Xyma8nALyGvc_mF8KEIZKKjcY
 
 {
-  "id": 2,
-  "loginId": "jin",
-  "password": "qwer123!",
-  "name": "JJ L",
-  "birthDate": "2000-01-01",
-  "gender": "MAN",
-  "email": "maiload77@gmail.com",
-  "companyCode": "2"
+    "id":2,
+    "loginId":"jin",
+    "password":"qwer123!",
+    "name":"JJ L",
+    "birthDate":"2000-01-01",
+    "gender":"MAN",
+    "email":"maiload77@gmail.com",
+    "companyCode":"2"
 }
+
 
 ### state update
 
