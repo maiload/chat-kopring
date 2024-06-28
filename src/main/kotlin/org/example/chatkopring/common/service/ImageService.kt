@@ -136,6 +136,11 @@ class ImageService(
         return "$fileName-${currentTimeMillisString}.$extension"
     }
 
+    fun getExtension(filename: String): String {
+        val parts = filename.split('.')
+        return parts.lastOrNull() ?: ""
+    }
+
     fun encodeImageToBase64(storageFileName: String): String? {
         val file = File(CHAT_IMAGE_OUTPUT_PATH + storageFileName)
         file.inputStream().use { inputStream ->

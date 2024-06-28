@@ -165,9 +165,10 @@ class MemberService(
             val file = Paths.get(PROFILE_IMAGE_OUTPUT_PATH + profileImage.storageFileName)
             val resource = UrlResource(file.toUri())
             val filename = UriUtils.encode(profileImage.originFileName, "UTF-8")
+            val subType = imageService.getExtension(profileImage.storageFileName)
             log.info("[${member.loginId}] Request Profile Image ($filename)")
             return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_TYPE, "image/$subType")
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; fileName=\"$filename\";")
                 .body(resource)
         } else {
