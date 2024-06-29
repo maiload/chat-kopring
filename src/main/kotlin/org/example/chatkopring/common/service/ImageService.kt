@@ -4,12 +4,11 @@ import org.example.chatkopring.chat.dto.ChatMessageDto
 import org.example.chatkopring.chat.entity.ChatImage
 import org.example.chatkopring.chat.entity.ChatMessage
 import org.example.chatkopring.chat.repository.ChatImageRepository
-import org.example.chatkopring.chat.service.CHAT_IMAGE_OUTPUT_PATH
 import org.example.chatkopring.member.entity.Member
 import org.example.chatkopring.member.entity.MemberImage
 import org.example.chatkopring.member.repository.MemberImageRepository
-import org.example.chatkopring.member.service.PROFILE_IMAGE_OUTPUT_PATH
 import org.example.chatkopring.util.logger
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
@@ -27,10 +26,16 @@ class ImageService(
 ) {
     val log = logger()
 
+    @Value("\${image.path.profile}")
+    lateinit var profileImageOutputPath: String
+
+    @Value("\${image.path.chat}")
+    lateinit var chatImageOutputPath: String
+
     fun uploadImage(image: MultipartFile, member: Member): MemberImage {
         val originFilename = image.originalFilename ?: "Untitled.jpg"
         val storageFilename = originFilename.generateStorageFileName()
-        val outputPath = PROFILE_IMAGE_OUTPUT_PATH + storageFilename
+        val outputPath = profileImageOutputPath + storageFilename
         val fileSize = image.size
         val memberImage = compareProfileImage(originFilename, fileSize, image.bytes, member)
         return if(memberImage == null){
@@ -47,7 +52,7 @@ class ImageService(
         requireNotNull(base64Image)
         val originFilename = chatMessageDto.content
         val storageFilename = originFilename.generateStorageFileName()
-        val outputPath = CHAT_IMAGE_OUTPUT_PATH + storageFilename
+        val outputPath = chatImageOutputPath + storageFilename
         val fileSize = base64Image.length.toLong()
         val chatImage = compareChatImage(originFilename, fileSize, Base64.getDecoder().decode(base64Image))
         return if(chatImage == null){
@@ -62,7 +67,7 @@ class ImageService(
     fun deleteImage(member: Member) {
         val savedProfileImage = memberImageRepository.findByMember(member)
         if(savedProfileImage != null){
-            val path = Paths.get(PROFILE_IMAGE_OUTPUT_PATH + savedProfileImage.storageFileName)
+            val path = Paths.get(profileImageOutputPath + savedProfileImage.storageFileName)
             Files.delete(path)
         }
     }
@@ -71,7 +76,7 @@ class ImageService(
         val memberImageList = memberImageRepository.findByOriginFileNameAndFileSizeAndMember(originFileName, fileSize, member)
         return memberImageList.firstOrNull {
             val requestImageSHA256 = calculateSHA256(requestImage)
-            val file = File(PROFILE_IMAGE_OUTPUT_PATH + it.storageFileName)
+            val file = File(profileImageOutputPath + it.storageFileName)
             val savedImageSHA256 = calculateSHA256(file)
             requestImageSHA256 == savedImageSHA256
         }
@@ -81,7 +86,7 @@ class ImageService(
         val chatImageList = chatImageRepository.findByOriginFileNameAndFileSize(originFileName, fileSize)
         return chatImageList.firstOrNull {
             val requestImageSHA256 = calculateSHA256(requestImage)
-            val file = File(CHAT_IMAGE_OUTPUT_PATH + it.storageFileName)
+            val file = File(chatImageOutputPath + it.storageFileName)
             val savedImageSHA256 = calculateSHA256(file)
             requestImageSHA256 == savedImageSHA256
         }
@@ -142,7 +147,7 @@ class ImageService(
     }
 
     fun encodeImageToBase64(storageFileName: String): String? {
-        val file = File(CHAT_IMAGE_OUTPUT_PATH + storageFileName)
+        val file = File(chatImageOutputPath + storageFileName)
         file.inputStream().use { inputStream ->
             val bytes = inputStream.readBytes()
 

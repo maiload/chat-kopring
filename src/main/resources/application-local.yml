@@ -12,7 +12,7 @@ spring:
     name: chat-kopring
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/chat
+    url: jdbc:mysql://172.24.16.1:3306/chat
     username: jin
     password: jin123
 
@@ -36,7 +36,7 @@ spring:
               - profile
 
   rabbitmq:
-    host: localhost
+    host: 172.24.16.1
     port: 5672
     username: user
     password: user
@@ -60,3 +60,8 @@ logging:
 
 jwt:
   secret: 35c7b4f895e434ba6932faa3750f5f12c4d4202bb97530487b79de199ad0eefe
+
+image:
+  path:
+    profile: src/main/resources/images/profile/
+    chat: src/main/resources/images/chat/

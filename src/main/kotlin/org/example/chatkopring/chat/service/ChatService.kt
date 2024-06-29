@@ -25,7 +25,7 @@ import java.nio.file.Paths
 import java.util.*
 import kotlin.jvm.optionals.getOrNull
 
-const val CHAT_IMAGE_OUTPUT_PATH: String = "src/main/resources/images/chat/"
+//const val CHAT_IMAGE_OUTPUT_PATH: String = "src/main/resources/images/chat/"
 
 @Transactional
 @Service

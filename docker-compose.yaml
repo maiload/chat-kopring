@@ -1,22 +1,5 @@
 version: "3.8"
 services:
-  kopring:
-    restart: on-failure
-    container_name: chat-kopring
-    build: .
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/chat
-      - SPRING_DATASOURCE_USERNAME=jin
-      - SPRING_DATASOURCE_PASSWORD=jin123
-      - RABBITMQ_HOST=localhost
-      - RABBITMQ_PORT=5672
-      - RABBITMQ_USERNAME=user
-      - RABBITMQ_PASSWORD=user
-    depends_on:
-      - mysql
-      - haproxy
 
   mysql:
     image: mysql:latest
@@ -28,6 +11,8 @@ services:
       MYSQL_PASSWORD: jin123
     ports:
       - "3306:3306"
+    networks:
+      - maiload
 #    volumes:
 #      - ./data/:/var/lib/mysql
 
@@ -36,12 +21,14 @@ services:
     container_name: rabbit1
     hostname: rabbit1
     environment:
-      - RABBITMQ_DEFAULT_USER=user
-      - RABBITMQ_DEFAULT_PASS=user
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: user
     volumes:
       - ./.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
       - ./cluster-entrypoint.sh:/usr/local/bin/cluster-entrypoint.sh
     entrypoint: /usr/local/bin/cluster-entrypoint.sh
+    networks:
+      - maiload
 
   rabbit2:
     image: rabbitmq:management
@@ -50,11 +37,13 @@ services:
     links:
       - rabbit1
     environment:
-      - JOIN_CLUSTER_HOST=rabbit1
+      JOIN_CLUSTER_HOST: rabbit1
     volumes:
       - ./.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
       - ./cluster-entrypoint.sh:/usr/local/bin/cluster-entrypoint.sh
     entrypoint: /usr/local/bin/cluster-entrypoint.sh
+    networks:
+      - maiload
 
   rabbit3:
     image: rabbitmq:management
@@ -64,11 +53,13 @@ services:
       - rabbit1
       - rabbit2
     environment:
-      - JOIN_CLUSTER_HOST=rabbit1
+      JOIN_CLUSTER_HOST: rabbit1
     volumes:
       - ./.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
       - ./cluster-entrypoint.sh:/usr/local/bin/cluster-entrypoint.sh
     entrypoint: /usr/local/bin/cluster-entrypoint.sh
+    networks:
+      - maiload
 
   haproxy:
     image: haproxy:latest
@@ -82,3 +73,29 @@ services:
       - "5672:5672"
       - "15672:15672"
       - "1936:1936"
+    networks:
+      - maiload
+
+#  kopring:
+#    restart: on-failure
+#    container_name: chat-kopring
+#    build: .
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/chat
+#      SPRING_DATASOURCE_USERNAME: jin
+#      SPRING_DATASOURCE_PASSWORD: jin123
+#      RABBITMQ_HOST: haproxy
+#      RABBITMQ_PORT: 5672
+#      RABBITMQ_USERNAME: user
+#      RABBITMQ_PASSWORD: user
+#    depends_on:
+#      - mysql
+#      - haproxy
+#    networks:
+#      - maiload
+
+networks:
+  maiload:
+    driver: bridge

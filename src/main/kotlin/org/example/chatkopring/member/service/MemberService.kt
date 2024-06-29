@@ -45,7 +45,7 @@ import java.io.File
 import java.nio.file.Paths
 import javax.print.attribute.standard.Media
 
-const val PROFILE_IMAGE_OUTPUT_PATH: String = "src/main/resources/images/profile/"
+//const val PROFILE_IMAGE_OUTPUT_PATH: String = "src/main/resources/images/profile/"
 
 @Transactional
 @Service
@@ -162,7 +162,7 @@ class MemberService(
         val profileImage = member.memberImage
 
         return if(profileImage != null){
-            val file = Paths.get(PROFILE_IMAGE_OUTPUT_PATH + profileImage.storageFileName)
+            val file = Paths.get(imageService.profileImageOutputPath + profileImage.storageFileName)
             val resource = UrlResource(file.toUri())
             val filename = UriUtils.encode(profileImage.originFileName, "UTF-8")
             val subType = imageService.getExtension(profileImage.storageFileName)
@@ -172,7 +172,7 @@ class MemberService(
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; fileName=\"$filename\";")
                 .body(resource)
         } else {
-            ResponseEntity.ok().body("프로필 이미지가 없습니다.")
+            ResponseEntity.ok().body("등록된 프로필 이미지가 없습니다.")
         }
     }
 
