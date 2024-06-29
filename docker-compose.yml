@@ -22,8 +22,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: user
-    volumes:
-      - ./.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
+      RABBITMQ_ERLANG_COOKIE: myCookie
     ports:
       - "5672:5672"
       - "15672:15672"
