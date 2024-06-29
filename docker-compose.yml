@@ -22,7 +22,10 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: user
-      RABBITMQ_ERLANG_COOKIE: myCookie
+    volumes:
+      - ./.erlang.cookie:/var/lib/rabbitmq/.erlang.cookie
+      - ./cluster-entrypoint.sh:/usr/local/bin/cluster-entrypoint.sh
+    entrypoint: /usr/local/bin/cluster-entrypoint.sh
     ports:
       - "5672:5672"
       - "15672:15672"
