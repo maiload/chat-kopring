@@ -197,7 +197,7 @@ class MemberService(
             ?: throw InvalidInputException("loginId", "존재하지 않는 ID(${memberDto.loginId}) 입니다")
         require(memberDto.id == savedMember.id) { throw InvalidInputException("id", "[${memberDto.loginId}] 회원 정보의 id(PK)가 일치하지 않습니다.") }
 //        if(role == Role.MEMBER.name) require(passwordEncoder.matches(memberDto.password, savedPw)) { "비밀번호를 다시 확인하세요." }
-        val member: Member = memberDto.toEntity(savedMember.password, role)
+        val member: Member = memberDto.toEntity(savedMember)
         var message = ""
         val memberImage = if (image != null) {
             message = " with Profile Image (${image.originalFilename})"

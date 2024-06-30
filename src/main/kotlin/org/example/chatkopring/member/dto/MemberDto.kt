@@ -114,6 +114,17 @@ data class MemberDto(
         else Member(id, loginId, password, name, birthDate, gender, email, profile, companyCode)
     }
 
+    fun toEntity(member: Member): Member {
+        return member.apply {
+            this.name = name
+            this.birthDate = birthDate
+            this.gender = gender
+            this.email = email
+            this.companyCode = companyCode
+            this.profile = profile
+        }
+    }
+
     private fun String.toLocalDate(): LocalDate =
         LocalDate.parse(this, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 }

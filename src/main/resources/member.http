@@ -1,17 +1,17 @@
 ### Log in
-GET http://localhost:8080/login
+GET http://43.203.222.95:8080/login
 
 ### Logout
-GET http://localhost:8080/api/member/logout
+GET http://43.203.222.95:8080/api/member/logout
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImlhdCI6MTcxNzU2MDM1MSwiZXhwIjoxNzE3NTYyMTUxfQ.qDv3hcm6HPdPC82fhW-HJrfChhqMHl0EKWZ7fTvuI20
 Refresh: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImV4cCI6MTcxNzY2ODM1MX0.v_BCzjJ8kFKXE58DlZml6mGh1fMn0j2tmbxTQ7UP4wU
 
 ### Reissue
-GET http://localhost:8080/api/member/reissue-token
+GET http://43.203.222.95:8080/api/member/reissue-token
 Refresh: yJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImV4cCI6MTcxNzc2NTk0MH0.LvEPzYmD-if0FSbNxmLM4ZQkgAWliEmH--Tcu0kWPGE
 
 ### Sign up admin
-POST http://localhost:8080/api/member/signup
+POST http://43.203.222.95:8080/api/member/signup
 Content-Type: application/json
 
 {
@@ -28,11 +28,11 @@ Content-Type: application/json
 }
 
 ### Sign up member
-POST http://localhost:8080/api/member/signup
+POST http://43.203.222.95:8080/api/member/signup
 Content-Type: application/json
 
 {
-  "loginId": "jin5",
+  "loginId": "jin",
   "password": "qwer123!",
   "name": "이정진",
   "birthDate": "1996-10-24",
@@ -41,7 +41,7 @@ Content-Type: application/json
 }
 
 ### Log in admin
-POST http://localhost:8080/api/member/login
+POST http://43.203.222.95:8080/api/member/login
 Content-Type: application/json
 
 {
@@ -49,7 +49,7 @@ Content-Type: application/json
   "password": "admin123!"
 }
 ### Log in member
-POST http://localhost:8080/api/member/login
+POST http://43.203.222.95:8080/api/member/login
 Content-Type: application/json
 
 {
@@ -59,17 +59,17 @@ Content-Type: application/json
 
 ### info
 
-GET http://localhost:8080/api/member/info
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTk2MjQzNTQsImV4cCI6MTcxOTcxMDc1NH0.YBGSNDk182JUYXwxEgDYxTDrkqHu8NJaF3i-qVDnLRI
+GET http://43.203.222.95:8080/api/member/info
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTk3MjY3MTIsImV4cCI6MTcxOTgxMzExMn0.rTEfohH2WLWEhfZKPbvqO3xPLdbubRGXssSEF4ewsZg
 
 ### info memberList
 
-GET http://localhost:8080/api/member/admin/info
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTk2MjQzNTQsImV4cCI6MTcxOTcxMDc1NH0.YBGSNDk182JUYXwxEgDYxTDrkqHu8NJaF3i-qVDnLRI
+GET http://43.203.222.95:8080/api/member/admin/info
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTk3MjY3MTIsImV4cCI6MTcxOTgxMzExMn0.rTEfohH2WLWEhfZKPbvqO3xPLdbubRGXssSEF4ewsZg
 
 ### info update
 
-PUT http://localhost:8080/api/member/info
+PUT http://43.203.222.95:8080/api/member/info
 Content-Type: multipart/form-data
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjIsImlhdCI6MTcxOTQ4MzQzMCwiZXhwIjoxNzE5NTY5ODMwfQ.97-vovEr3peeChhmX5Xyma8nALyGvc_mF8KEIZKKjcY
 
@@ -87,9 +87,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NR
 
 ### state update
 
-PUT http://localhost:8080/api/member/admin/info
+PUT http://43.203.222.95:8080/api/member/admin/info
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTk2MjQzNTQsImV4cCI6MTcxOTcxMDc1NH0.YBGSNDk182JUYXwxEgDYxTDrkqHu8NJaF3i-qVDnLRI
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTk3MjY3MTIsImV4cCI6MTcxOTgxMzExMn0.rTEfohH2WLWEhfZKPbvqO3xPLdbubRGXssSEF4ewsZg
 
 {
   "id": 2,
@@ -105,12 +105,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX
 
 ### Approved colleague
 
-GET http://localhost:8080/api/member/colleague
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTk2MjQzNTQsImV4cCI6MTcxOTcxMDc1NH0.YBGSNDk182JUYXwxEgDYxTDrkqHu8NJaF3i-qVDnLRI
+GET http://43.203.222.95:8080/api/member/colleague
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTk3MjY3MTIsImV4cCI6MTcxOTgxMzExMn0.rTEfohH2WLWEhfZKPbvqO3xPLdbubRGXssSEF4ewsZg
 
 
 ### NotJoined colleague
 
-GET http://localhost:8080/api/member/colleague/notJoin?
+GET http://43.203.222.95:8080/api/member/colleague/notJoin?
     roomId=1
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTk2MjQzNTQsImV4cCI6MTcxOTcxMDc1NH0.YBGSNDk182JUYXwxEgDYxTDrkqHu8NJaF3i-qVDnLRI
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTk3MjY3MTIsImV4cCI6MTcxOTgxMzExMn0.rTEfohH2WLWEhfZKPbvqO3xPLdbubRGXssSEF4ewsZg

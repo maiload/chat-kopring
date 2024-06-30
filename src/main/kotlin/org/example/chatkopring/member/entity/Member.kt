@@ -27,24 +27,24 @@ class Member(
     val password: String,
 
     @Column(nullable = false, length = 10)
-    val name: String,
+    var name: String,
 
     @Column(nullable = false)
     @Temporal(TemporalType.DATE)
-    val birthDate: LocalDate,
+    var birthDate: LocalDate,
 
     @Column(nullable = false, length = 5)
     @Enumerated(EnumType.STRING)
-    val gender: Gender,
+    var gender: Gender,
 
     @Column(nullable = false, length = 30)
-    val email: String,
+    var email: String,
 
     @Column(nullable = false, length = 300)
-    val profile: String,
+    var profile: String,
 
     @Column(nullable = true, length = 20)
-    val companyCode: String? = null,
+    var companyCode: String? = null,
 
     @Column(nullable = true, length = 10)
     val ceoName: String? = null,
@@ -71,7 +71,8 @@ class Member(
         this.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
 
     fun toResponseDto(): MemberResponse =
-        MemberResponse(id!!, loginId, name, birthDate.formatDate(), gender.name, email, memberRole!!.first().role.name, companyCode, state.name, profile)
+        MemberResponse(id!!, loginId, name, birthDate.formatDate(), gender.name, email, memberRole!!.first().role.name, state.name, profile,
+            companyCode, ceoName, companyName, businessId, companyCertificateNumber)
 
     fun toDto(): MemberDto =
         MemberDto(id!!, loginId, password, name, birthDate.formatDate(), gender.name, email)

@@ -5,10 +5,10 @@ import jakarta.persistence.*
 
 @Entity
 class ChatImage(
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 250)
     val originFileName: String,
 
-    @Column(nullable = false, length = 120)
+    @Column(nullable = false, length = 250)
     val storageFileName: String,
 
     @Column(nullable = false)

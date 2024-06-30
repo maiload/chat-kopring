@@ -1,11 +1,11 @@
 ### Paticipated rooms
 
-GET http://localhost:8080/api/chat/rooms
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTk2MjQzNTQsImV4cCI6MTcxOTcxMDc1NH0.YBGSNDk182JUYXwxEgDYxTDrkqHu8NJaF3i-qVDnLRI
+GET http://43.203.222.95:8080/api/chat/rooms
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTk3MjY3MTIsImV4cCI6MTcxOTgxMzExMn0.rTEfohH2WLWEhfZKPbvqO3xPLdbubRGXssSEF4ewsZg
 
 
 ### ChatHistory 100개
 
-GET http://localhost:8080/api/chat/history?
+GET http://43.203.222.95:8080/api/chat/history?
     roomId=1
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTk2MjQzNTQsImV4cCI6MTcxOTcxMDc1NH0.YBGSNDk182JUYXwxEgDYxTDrkqHu8NJaF3i-qVDnLRI
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJpYXQiOjE3MTk3MjY3MTIsImV4cCI6MTcxOTgxMzExMn0.rTEfohH2WLWEhfZKPbvqO3xPLdbubRGXssSEF4ewsZg

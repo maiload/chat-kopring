@@ -23,9 +23,8 @@ class OAuth2SuccessHandler(
         response: HttpServletResponse,
         authentication: Authentication
     ) {
-        log.info("authentication : $authentication")
+        log.info("OAuth2SuccessHandler.authentication : $authentication")
         val tokenInfo = jwtTokenProvider.createToken(authentication)
-        log.info("tokenInfo : $tokenInfo")
         val type = if(memberRepository.findByLoginId(authentication.name)!!.birthDate.year == 1000) "SIGNUP" else "LOGIN"
 
 //        response.apply {
@@ -39,6 +38,7 @@ class OAuth2SuccessHandler(
         val redirectUri = UriComponentsBuilder.fromUriString(URI_STRING)
             .queryParam("accessToken", tokenInfo.accessToken)
             .queryParam("refresh", tokenInfo.refreshToken)
+            .queryParam("type", type)
             .build().toUriString()
 
         response.sendRedirect(redirectUri)
