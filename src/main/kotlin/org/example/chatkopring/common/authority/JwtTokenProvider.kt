@@ -14,8 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
 import java.util.*
 
-const val EXPIRATION_MILLISECONDS: Long = 60 * 60 * 1000    // 1시간
-//const val EXPIRATION_MILLISECONDS: Long = 1 * 60 * 1000
+//const val EXPIRATION_MILLISECONDS: Long = 60 * 60 * 1000    // 1시간
 
 @Component
 class JwtTokenProvider {
@@ -23,6 +22,12 @@ class JwtTokenProvider {
 
     @Value("\${jwt.secret}")
     lateinit var secretKey: String
+
+    @Value("\${jwt.accessExpire}")
+    lateinit var accessExpire: String
+
+    @Value("\${jwt.refreshExpire}")
+    lateinit var refreshExpire: String
 
     private val key by lazy { Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)) }
 
@@ -35,8 +40,8 @@ class JwtTokenProvider {
             .joinToString(",") { it.authority }
 
         val now = Date()
-        val accessExpiration = Date(now.time + EXPIRATION_MILLISECONDS * 24)     // 1시간
-        val refreshExpiration = Date(now.time + EXPIRATION_MILLISECONDS * 48)   // 48시간
+        val accessExpiration = Date(now.time + accessExpire.toLong())
+        val refreshExpiration = Date(now.time + refreshExpire.toLong())
 
         // Access Token
         val accessToken = Jwts.builder()

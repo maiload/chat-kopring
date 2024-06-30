@@ -60,6 +60,8 @@ logging:
 
 jwt:
   secret: 35c7b4f895e434ba6932faa3750f5f12c4d4202bb97530487b79de199ad0eefe
+  accessExpire: 180000
+  refreshExpire: 3000000
 
 image:
   path:

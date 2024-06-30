@@ -9,6 +9,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component
 import org.springframework.web.util.UriComponentsBuilder
 
+// TODO : 소셜 로그인 성공 처리
 const val URI_STRING: String = "http://localhost:3000/loading"
 
 @Component
