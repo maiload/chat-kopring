@@ -1,9 +1,6 @@
 package org.example.chatkopring.chat.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.jsonwebtoken.security.Message
 import jakarta.validation.Valid
 import org.example.chatkopring.chat.config.RabbitmqConfig
 import org.example.chatkopring.chat.config.UserSessionRegistry
@@ -14,7 +11,6 @@ import org.example.chatkopring.common.dto.CustomUser
 import org.example.chatkopring.common.exception.InvalidInputException
 import org.example.chatkopring.common.exception.UnAuthorizationException
 import org.example.chatkopring.common.status.MessageType
-import org.example.chatkopring.common.status.Role
 import org.example.chatkopring.common.status.State
 import org.example.chatkopring.member.service.MemberService
 import org.example.chatkopring.util.logger
@@ -51,7 +47,7 @@ class ChatController2(
     fun handleWebSocketConnectListener(event: SessionConnectEvent) {
         val user = (StompHeaderAccessor.wrap(event.message).user as UsernamePasswordAuthenticationToken).principal as CustomUser
         log.info("New Connection : ${user.username} ${user.authorities}")
-        userSessionRegistry.registerSession(user.name)
+        userSessionRegistry.registerSession(user.username)
         messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.CONNECT, user.name))
     }
 
@@ -59,7 +55,7 @@ class ChatController2(
     fun handleWebSocketDisconnectListener(event: SessionDisconnectEvent) {
         val user = (StompHeaderAccessor.wrap(event.message).user as UsernamePasswordAuthenticationToken).principal as CustomUser
         log.info("User Disconnected : ${user.username} ${user.authorities}")
-        userSessionRegistry.removeSession(user.name)
+        userSessionRegistry.removeSession(user.username)
         messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.DISCONNECT, user.name))
         // 모든 방 INACTIVE
         val allParticipatedRooms = chatService.loadAllParticipatedRooms(user.name)

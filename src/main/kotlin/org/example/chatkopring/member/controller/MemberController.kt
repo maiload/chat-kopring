@@ -148,4 +148,8 @@ class MemberController (
         return BaseResponse(data = response,
             message = if (response.isEmpty()) "모든 사용자가 참여중입니다." else "${response.size}명의 미참여 유저가 있습니다.")
     }
+
+    @GetMapping("/users")
+    fun getConnectedUsers(): BaseResponse<MutableSet<String>> = BaseResponse(data = memberService.getConnectedUsers())
+
 }

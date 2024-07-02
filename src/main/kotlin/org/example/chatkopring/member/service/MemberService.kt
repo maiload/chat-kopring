@@ -2,6 +2,7 @@ package org.example.chatkopring.member.service
 
 import jakarta.transaction.Transactional
 import org.apache.coyote.Response
+import org.example.chatkopring.chat.config.UserSessionRegistry
 import org.example.chatkopring.chat.repository.ChatRoomRepository
 import org.example.chatkopring.chat.repository.ParticipantRepository
 import org.example.chatkopring.common.authority.JwtTokenProvider
@@ -59,6 +60,7 @@ class MemberService(
     private val authenticationManagerBuilder: AuthenticationManagerBuilder,
     private val jwtTokenProvider: JwtTokenProvider,
     private val imageService: ImageService,
+    private val userSessionRegistry: UserSessionRegistry,
 ) {
     val log = logger()
     val passwordEncoder: PasswordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder()
@@ -232,12 +234,14 @@ class MemberService(
         require(member.state == State.APPROVED) { throw UnAuthorizationException(member.loginId, "[${member.state}] 승인되지 않은 사용자입니다.") }
         val allColleagues = memberRepository.findByCompanyCodeAndState(member.companyCode!!, member.state)
         return if (roomId == null) {   // 모든 회사 사용자
-            allColleagues.map { it.toResponseDto() }
+            allColleagues.map { it.toResponseDto().apply { this.isConnected = userSessionRegistry.isExist(this.loginId) } }
         }else{  // 특정 방에 없는 회사 사용자
             val chatRoom = chatRoomRepository.findById(roomId).get()
             require(chatRoom.roomType != RoomType.PRIVATE) { throw InvalidInputException(roomId, "PRIVATE 채팅방은 사용자를 초대할 수 없습니다.") }
             allColleagues.filter { !participantRepository.existsByChatRoomAndLoginId(chatRoom, it.loginId) }
-                .map { it.toResponseDto() }
+                .map { it.toResponseDto().apply { this.isConnected = userSessionRegistry.isExist(this.loginId) } }
         }
     }
+
+    fun getConnectedUsers(): MutableSet<String> = userSessionRegistry.getUsers()
 }

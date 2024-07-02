@@ -17,4 +17,5 @@ data class MemberResponse(
     val companyName: String?,
     val businessId: String?,
     val companyCertificateNumber: String?,
+    var isConnected: Boolean?,
 )

@@ -72,7 +72,7 @@ class Member(
 
     fun toResponseDto(): MemberResponse =
         MemberResponse(id!!, loginId, name, birthDate.formatDate(), gender.name, email, memberRole!!.first().role.name, state.name, profile,
-            companyCode, ceoName, companyName, businessId, companyCertificateNumber)
+            companyCode, ceoName, companyName, businessId, companyCertificateNumber, null)
 
     fun toDto(): MemberDto =
         MemberDto(id!!, loginId, password, name, birthDate.formatDate(), gender.name, email)
