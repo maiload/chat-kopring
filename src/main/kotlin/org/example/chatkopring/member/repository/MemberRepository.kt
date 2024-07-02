@@ -23,6 +23,5 @@ interface BlackListRepository: JpaRepository<BlackList, Long> {
 }
 
 interface MemberImageRepository: JpaRepository<MemberImage, Long> {
-    fun findByOriginFileNameAndFileSizeAndMember(originFileName: String, fileSize: Long, member: Member): List<MemberImage>
     fun findByMember(member: Member): MemberImage?
 }

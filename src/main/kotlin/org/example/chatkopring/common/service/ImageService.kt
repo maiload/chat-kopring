@@ -36,8 +36,7 @@ class ImageService(
         val originFilename = image.originalFilename ?: "Untitled.jpg"
         val storageFilename = originFilename.generateStorageFileName()
         val outputPath = profileImageOutputPath + storageFilename
-        val fileSize = image.size
-        val memberImage = compareProfileImage(originFilename, fileSize, image.bytes, member)
+        val memberImage = compareProfileImage(image.bytes, member)
         return if(memberImage == null){
             saveImage(image, outputPath)
             MemberImage(originFilename, storageFilename, image.size)
@@ -72,9 +71,9 @@ class ImageService(
         }
     }
 
-    private fun compareProfileImage(originFileName: String, fileSize: Long, requestImage: ByteArray, member: Member): MemberImage? {
-        val memberImageList = memberImageRepository.findByOriginFileNameAndFileSizeAndMember(originFileName, fileSize, member)
-        return memberImageList.firstOrNull {
+    private fun compareProfileImage(requestImage: ByteArray, member: Member): MemberImage? {
+        val savedProfileImage = memberImageRepository.findByMember(member)
+        return savedProfileImage?.takeIf {
             val requestImageSHA256 = calculateSHA256(requestImage)
             val file = File(profileImageOutputPath + it.storageFileName)
             val savedImageSHA256 = calculateSHA256(file)

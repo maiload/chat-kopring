@@ -65,5 +65,5 @@ jwt:
 
 image:
   path:
-    profile: src/images/profile/
-    chat: src/images/chat/
+    profile: ../images/profile/
+    chat: ../images/chat/
