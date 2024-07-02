@@ -45,21 +45,27 @@ class ChatController2(
 
     @EventListener
     fun handleWebSocketConnectListener(event: SessionConnectEvent) {
-        val user = (StompHeaderAccessor.wrap(event.message).user as UsernamePasswordAuthenticationToken).principal as CustomUser
-        log.info("New Connection : ${user.username} ${user.authorities}")
-        userSessionRegistry.registerSession(user.username)
-        messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.CONNECT, user.name))
+        val user = StompHeaderAccessor.wrap(event.message).user
+        if(user != null) {
+            val customUser = (user as UsernamePasswordAuthenticationToken).principal as CustomUser
+            log.info("New Connection : ${customUser.username} ${user.authorities}")
+            userSessionRegistry.registerSession(customUser.username)
+            messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.CONNECT, user.name))
+        }
     }
 
     @EventListener
     fun handleWebSocketDisconnectListener(event: SessionDisconnectEvent) {
-        val user = (StompHeaderAccessor.wrap(event.message).user as UsernamePasswordAuthenticationToken).principal as CustomUser
-        log.info("User Disconnected : ${user.username} ${user.authorities}")
-        userSessionRegistry.removeSession(user.username)
-        messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.DISCONNECT, user.name))
-        // 모든 방 INACTIVE
-        val allParticipatedRooms = chatService.loadAllParticipatedRooms(user.name)
-        allParticipatedRooms?.forEach { chatService.inactiveRoom(it.toChatRoomDto()) }
+        val user = StompHeaderAccessor.wrap(event.message).user
+        if(user != null) {
+            val customUser = (user as UsernamePasswordAuthenticationToken).principal as CustomUser
+            log.info("User Disconnected : ${customUser.username} ${user.authorities}")
+            userSessionRegistry.removeSession(customUser.username)
+            messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.DISCONNECT, user.name))
+            // 모든 방 INACTIVE
+            val allParticipatedRooms = chatService.loadAllParticipatedRooms(user.name)
+            allParticipatedRooms?.forEach { chatService.inactiveRoom(it.toChatRoomDto()) }
+        }
     }
 
     @EventListener
