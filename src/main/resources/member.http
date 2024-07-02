@@ -8,7 +8,7 @@ Refresh: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2
 
 ### Reissue
 GET http://43.203.222.95:8080/api/member/reissue-token
-Refresh: yJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqaW4iLCJhdXRoIjoiUk9MRV9NRU1CRVIiLCJ1c2VySWQiOjEsImV4cCI6MTcxNzc2NTk0MH0.LvEPzYmD-if0FSbNxmLM4ZQkgAWliEmH--Tcu0kWPGE
+Refresh: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOIiwidXNlcklkIjoxLCJleHAiOjE3MTk4NDIwOTh9.KfL7z2wag4xukQLln9WaAJl00vGwjFeSi5vPiZOipk4
 
 ### Sign up admin
 POST http://43.203.222.95:8080/api/member/signup
