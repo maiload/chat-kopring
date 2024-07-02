@@ -21,7 +21,9 @@ class WebSocketBrokerConfig(
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
         registry.addEndpoint("/ws/chat")        // ws://localhost:8080/ws/chat
             .setAllowedOriginPatterns("*")
-//            .withSockJS()
+            .withSockJS()
+        registry.addEndpoint("/ws/chat")        // ws://localhost:8080/ws/chat
+            .setAllowedOriginPatterns("*")
     }
 
     override fun configureClientInboundChannel(registration: ChannelRegistration) {
