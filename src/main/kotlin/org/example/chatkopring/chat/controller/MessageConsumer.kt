@@ -94,9 +94,11 @@ class MessageConsumer(
                 chatService.activeRoom(chatRoomDto)
                 // 참여자 강제 JOIN
                 chatRoomDto.participant.forEach {
-                    val roomDto = ChatRoomDto(roomId, it, roomType)
-                    chatService.joinRoom(roomDto)
-                    chatService.inactiveRoom(roomDto)
+                    if(it != loginId) {
+                        val roomDto = ChatRoomDto(roomId, it, roomType)
+                        chatService.joinRoom(roomDto)
+                        chatService.inactiveRoom(roomDto)
+                    }
                 }
             }
         }
