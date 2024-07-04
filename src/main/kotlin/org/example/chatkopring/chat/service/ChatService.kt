@@ -80,6 +80,9 @@ class ChatService(
     fun getLastChatMessage(roomId: String, sender: String) =
         chatMessageRepository.findFirstByRoomIdOrderByIdDesc(roomId, sender, PageRequest.of(0,1)).first()
 
+    fun isInactivatedRoom(chatRoom: ChatRoom, loginId: String): Boolean =
+        chatMessageRepository.existsByChatRoomAndSenderAndType(chatRoom, loginId, MessageType.INACTIVE)
+
     fun sendMessage(chatMessageDto: ChatMessageDto, chatRoom: ChatRoom) {
         val chatRoomDto = chatMessageDto.toChatRoomDto(chatRoom.roomType)
         val (roomId, creator, roomType, title) = chatRoomDto

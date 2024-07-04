@@ -63,9 +63,13 @@ class ChatController2(
             log.info("User Disconnected : ${customUser.username} ${user.authorities}")
             userSessionRegistry.removeSession(customUser.username)
             messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.DISCONNECT, user.name))
-            // 모든 방 INACTIVE
+            // INACTIVE 가 아닌 모든 방 INACTIVE
             val allParticipatedRooms = chatService.loadAllParticipatedRooms(user.name)
-            allParticipatedRooms?.forEach { chatService.inactiveRoom(it.toChatRoomDto()) }
+            allParticipatedRooms?.forEach {
+                if(!chatService.isInactivatedRoom(it.chatRoom, user.name)) {
+                    chatService.inactiveRoom(it.toChatRoomDto())
+                }
+            }
         }
     }
 
