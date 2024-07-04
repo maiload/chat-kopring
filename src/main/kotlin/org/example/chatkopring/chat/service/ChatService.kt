@@ -49,6 +49,7 @@ class ChatService(
             chatMessageRepository.save(createChatMessage)
             messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(createChatMessage.type, createChatMessage.sender, chatRoomDto.roomId))
             messagingTemplate.convertAndSend("/sub/chat/${chatRoomDto.roomId}", createChatMessage)
+            log.info("[${chatRoomDto.creator}] create [${chatRoomDto.roomType}] room (${chatRoomDto.roomId})")
             return true;
         }
     }
@@ -75,8 +76,6 @@ class ChatService(
             else -> null
         }
     }
-//        chatRoomRepository.existsByReceiverAndCreatorAndJoinNumberGreaterThanEqual(receiver, creator, 1)
-//                || chatRoomRepository.existsByReceiverAndCreatorAndJoinNumberGreaterThanEqual(creator, receiver, 1)
 
     fun getLastChatMessage(roomId: String, sender: String) =
         chatMessageRepository.findFirstByRoomIdOrderByIdDesc(roomId, sender, PageRequest.of(0,1)).first()
@@ -105,13 +104,11 @@ class ChatService(
                 }
             }
             messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(chatMessageDto.type, chatMessageDto.sender, chatMessageDto.roomId))
-            log.info("${chatMessageDto.sender} sent message to room (${chatMessageDto.roomId})")
+            log.info("[${chatMessageDto.sender}] sent message to room (${chatMessageDto.roomId})")
         }else{
             sendErrorMessage(chatRoomDto.toErrorMessage("입장중인 방이 아니거나 Active 되지 않았습니다."))
         }
     }
-
-
 
     fun activeRoom(chatRoomDto: ChatRoomDto) {
         // INACTIVE ChatMessage 삭제
@@ -120,6 +117,7 @@ class ChatService(
         val participant = participantRepository.findByLoginIdAndChatRoom(chatRoomDto.creator, chatRoomDto.toEntity())
         if (participant.unreadMsgNumber != 0) participantRepository.save(participant.resetUnreadNumber())
         messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.ACTIVE, chatRoomDto.creator, chatRoomDto.roomId))
+        log.info("[${chatRoomDto.creator}] activate the room (${chatRoomDto.roomId})")
     }
 
     fun inactiveRoom(chatRoomDto: ChatRoomDto) {
@@ -130,6 +128,7 @@ class ChatService(
         if(isJoinedRoom && !isInActive) {
             chatMessageRepository.save(chatRoomDto.makeChatMessage(MessageType.INACTIVE))
             messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.INACTIVE, creator, roomId))
+            log.info("[${chatRoomDto.creator}] inactivate the room (${chatRoomDto.roomId})")
         }else{
             sendErrorMessage(chatRoomDto.toErrorMessage("입장중인 방이 아니거나 이미 INACTIVE 상태 입니다."))
         }
@@ -142,8 +141,8 @@ class ChatService(
         participantRepository.save(Participant(chatRoomDto.toEntity(), creator))
         val joinChatMessage = chatRoomDto.makeChatMessage(MessageType.JOIN)
         chatMessageRepository.save(joinChatMessage)
-        log.info("$creator joined the room ($roomId)")
         messagingTemplate.convertAndSend("/sub/chat/${roomId}", joinChatMessage)
+        log.info("[$creator] joined the room ($roomId)")
     }
 
     fun inviteRoom(chatRoomDto: ChatRoomDto, loginId: String) {
@@ -182,9 +181,9 @@ class ChatService(
                 // 채팅방에 남은 참여자가 없으면 INVALID 로 변경
                 chatRoom.valid = false
                 chatRoomRepository.save(chatRoom)
-                log.info("$creator leaved the room (${roomId}) and the room changed INVALID")
+                log.info("[$creator] leaved the room (${roomId}) and the room changed INVALID")
             } else{
-                log.info("$creator leaved the room (${roomId})")
+                log.info("[$creator] leaved the room (${roomId})")
             }
             messagingTemplate.convertAndSend("/sub/chat/${roomId}", leaveChatMessage)
         }else{

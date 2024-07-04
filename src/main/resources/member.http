@@ -32,7 +32,7 @@ POST http://43.203.222.95:8080/api/member/signup
 Content-Type: application/json
 
 {
-  "loginId": "jin",
+  "loginId": "jin5",
   "password": "qwer123!",
   "name": "이정진",
   "birthDate": "1996-10-24",
