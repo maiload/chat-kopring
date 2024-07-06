@@ -54,7 +54,7 @@ class ChatController2(
                 userSessionRegistry.registerSession(customUser.username)
                 messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.CONNECT, user.name))
             }else{
-                log.warn("Connection : ${customUser.username} is already in userSessionRegistry")
+                log.warn("Connection : [${customUser.username}] is already in userSessionRegistry")
             }
         }
     }
@@ -76,7 +76,7 @@ class ChatController2(
                     }
                 }
             }else{
-                log.warn("Disconnected : ${customUser.username} is not in userSessionRegistry")
+                log.warn("Disconnected : [${customUser.username}] is not in userSessionRegistry")
             }
         }
     }
@@ -93,6 +93,10 @@ class ChatController2(
         log.info("[${headerAccessor.user?.name}] Subscribed, Destination : ${headerAccessor.destination}")
     }
 
+    /**
+     * 채팅방 열기 (ACTIVE)
+     * @param roomId
+     */
     @ResponseBody
     @GetMapping("/api/chat/history")
     fun getChatHistory(@RequestParam roomId: String,
@@ -130,7 +134,6 @@ class ChatController2(
         val message = MessageDto(headerAccessor.user!!.name, MessageType.INACTIVE.name, chatRoomDto)
         rabbitTemplate.convertAndSend(rabbitmqConfig.directExchange().name, rabbitmqConfig.outQueue().name, messageToJSON(message))
     }
-
 
     /**
      * 메세지 전송

@@ -109,7 +109,7 @@ class ChatService(
             messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(chatMessageDto.type, chatMessageDto.sender, chatMessageDto.roomId))
             log.info("[${chatMessageDto.sender}] sent message to room (${chatMessageDto.roomId})")
         }else{
-            sendErrorMessage(chatRoomDto.toErrorMessage("입장중인 방이 아니거나 Active 되지 않았습니다."))
+            sendErrorMessage(chatRoomDto.toErrorMessage("sendMessage() : 입장중인 방이 아니거나 Active 되지 않았습니다."))
         }
     }
 
@@ -133,7 +133,7 @@ class ChatService(
             messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.INACTIVE, creator, roomId))
             log.info("[${chatRoomDto.creator}] inactivate the room (${chatRoomDto.roomId})")
         }else{
-            sendErrorMessage(chatRoomDto.toErrorMessage("입장중인 방이 아니거나 이미 INACTIVE 상태 입니다."))
+            sendErrorMessage(chatRoomDto.toErrorMessage("inactiveRoom() : 입장중인 방이 아니거나 이미 INACTIVE 상태 입니다."))
         }
     }
 
@@ -165,7 +165,7 @@ class ChatService(
                 }
             }
         }else{
-            sendErrorMessage(ErrorMessage("입장중인 방이 아니거나 참여자 리스트가 없습니다.", loginId, roomId))
+            sendErrorMessage(ErrorMessage("inviteRoom() : 입장중인 방이 아니거나 참여자 리스트가 없습니다.", loginId, roomId))
         }
     }
 
