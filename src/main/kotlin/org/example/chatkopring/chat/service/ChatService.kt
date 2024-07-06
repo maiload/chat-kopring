@@ -57,7 +57,7 @@ class ChatService(
     fun roomIdValidate(roomId: String): Boolean = chatRoomRepository.existsById(roomId)
 
 
-    fun isPrivateRoomExist(creator: String, receiver: String, chatRoomDto: ChatRoomDto): String? {
+    fun isPrivateRoomExist(creator: String, receiver: String): String? {
         val creatorChatRoomList = chatRoomRepository.findByRoomTypeAndCreatorAndValid(RoomType.PRIVATE, creator, true)
         val receiverRoomId = creatorChatRoomList
             ?.filter { chatRoom -> chatRoom.participants!!.any { it.loginId == receiver } }

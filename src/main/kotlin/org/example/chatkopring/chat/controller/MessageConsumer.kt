@@ -112,16 +112,17 @@ class MessageConsumer(
         if(receiver == null || receiver == creator) {
             sendErrorMessage(ErrorMessage("Private 채팅방은 자신을 제외한 참여자가 있어야 합니다.", creator, roomId))
         }else{
-            val alreadyCreatedRoomId = chatService.isPrivateRoomExist(creator, receiver, chatRoomDto)
+            val alreadyCreatedRoomId = chatService.isPrivateRoomExist(creator, receiver)
             if(alreadyCreatedRoomId != null){
                 log.info("Already private room existed (${creator} & ${receiver})")
                 val lastChatMessage = chatService.getLastChatMessage(alreadyCreatedRoomId, creator)
+                val loadedChatRoom = chatRoomDto.loadChatRoom(alreadyCreatedRoomId)
                 if(lastChatMessage.type == MessageType.LEAVE) {
                     // 재입장
-                    chatService.joinRoom(chatRoomDto)
+                    chatService.joinRoom(loadedChatRoom)
                 }
-                // 재입장 활성화 or 활성화
-                chatService.activeRoom(chatRoomDto)
+                // 재입장 후 활성화 or 활성화
+                chatService.activeRoom(loadedChatRoom)
             }else{
                 if (chatService.createRoom(chatRoomDto)) {
                     // 생성자 JOIN

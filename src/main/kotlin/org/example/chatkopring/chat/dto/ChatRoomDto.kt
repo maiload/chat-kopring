@@ -26,4 +26,5 @@ data class ChatRoomDto(
     fun toErrorMessage(message: String) = ErrorMessage(message, creator, roomId)
     fun toEntity() = ChatRoom(roomId, title, creator, roomType)
     fun makeChatMessage(type: MessageType) = ChatMessage(creator, type, this.toEntity())
+    fun loadChatRoom(alreadyCreatedRoomId: String) = ChatRoomDto(alreadyCreatedRoomId, creator, roomType, title, participant)
 }
