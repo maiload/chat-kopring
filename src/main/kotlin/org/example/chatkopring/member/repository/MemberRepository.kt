@@ -6,6 +6,7 @@ import org.example.chatkopring.member.entity.BlackList
 import org.example.chatkopring.member.entity.Member
 import org.example.chatkopring.member.entity.MemberImage
 import org.example.chatkopring.member.entity.MemberRole
+import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface MemberRepository: JpaRepository<Member, Long> {
@@ -13,6 +14,7 @@ interface MemberRepository: JpaRepository<Member, Long> {
     fun findByEmail(email: String): Member?
     fun existsByBusinessId(businessId: String): Boolean
     fun findByCompanyCodeAndStateNot(companyCode: String, state: State): List<Member>?
+    @EntityGraph(attributePaths = ["memberImage"])
     fun findByCompanyCodeAndState(companyCode: String, state: State): List<Member>
 }
 

@@ -19,6 +19,7 @@ import org.example.chatkopring.member.dto.MemberDto
 import org.example.chatkopring.member.dto.MemberResponse
 import org.example.chatkopring.member.entity.BlackList
 import org.example.chatkopring.member.entity.Member
+import org.example.chatkopring.member.entity.MemberImage
 import org.example.chatkopring.member.entity.MemberRole
 import org.example.chatkopring.member.repository.BlackListRepository
 import org.example.chatkopring.member.repository.CompanyRepository
@@ -43,7 +44,9 @@ import org.springframework.util.MultiValueMap
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.util.UriUtils
 import java.io.File
+import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.Base64
 import javax.print.attribute.standard.Media
 
 //const val PROFILE_IMAGE_OUTPUT_PATH: String = "src/main/resources/images/profile/"
@@ -178,6 +181,14 @@ class MemberService(
         }
     }
 
+    fun getImageWithBASE64(memberImage: MemberImage?): String? {
+        return if(memberImage != null){
+            val file = Paths.get(imageService.profileImageOutputPath + memberImage.storageFileName)
+            val imageArr = Files.readAllBytes(file.toAbsolutePath())
+            Base64.getEncoder().encodeToString(imageArr);
+        } else null
+    }
+
 
     fun searchMyInfo(loginId: String): MemberResponse {
         val member: Member = memberRepository.findByLoginId(loginId)
@@ -234,12 +245,18 @@ class MemberService(
         require(member.state == State.APPROVED) { throw UnAuthorizationException(member.loginId, "[${member.state}] 승인되지 않은 사용자입니다.") }
         val allColleagues = memberRepository.findByCompanyCodeAndState(member.companyCode!!, member.state)
         return if (roomId == null) {   // 모든 회사 사용자
-            allColleagues.map { it.toResponseDto().apply { this.isConnected = userSessionRegistry.isExist(this.loginId) } }
+            allColleagues.map { it.toResponseDto().apply {
+                this.isConnected = userSessionRegistry.isExist(this.loginId)
+                this.profileImage = getImageWithBASE64(it.memberImage)
+            } }
         }else{  // 특정 방에 없는 회사 사용자
             val chatRoom = chatRoomRepository.findById(roomId).get()
             require(chatRoom.roomType != RoomType.PRIVATE) { throw InvalidInputException(roomId, "PRIVATE 채팅방은 사용자를 초대할 수 없습니다.") }
             allColleagues.filter { !participantRepository.existsByChatRoomAndLoginId(chatRoom, it.loginId) }
-                .map { it.toResponseDto().apply { this.isConnected = userSessionRegistry.isExist(this.loginId) } }
+                .map { it.toResponseDto().apply {
+                    this.isConnected = userSessionRegistry.isExist(this.loginId)
+                    this.profileImage = getImageWithBASE64(it.memberImage)
+                } }
         }
     }
 
