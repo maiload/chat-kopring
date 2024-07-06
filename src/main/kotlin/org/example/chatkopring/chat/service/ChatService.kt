@@ -86,10 +86,10 @@ class ChatService(
     fun sendMessage(chatMessageDto: ChatMessageDto, chatRoom: ChatRoom) {
         val chatRoomDto = chatMessageDto.toChatRoomDto(chatRoom.roomType)
         val (roomId, creator, roomType, title) = chatRoomDto
-        val isJoinedRoom = participantRepository.existsByChatRoomAndLoginId(chatRoomDto.toEntity(), creator)
-        val isInActive = chatMessageRepository.existsByChatRoomAndSenderAndType(chatRoomDto.toEntity(), creator, MessageType.INACTIVE)
+        val isJoinedRoom = participantRepository.existsByChatRoomAndLoginId(chatRoom, creator)
+        val isInActive = chatMessageRepository.existsByChatRoomAndSenderAndType(chatRoom, creator, MessageType.INACTIVE)
         if(isJoinedRoom && !isInActive){
-            val chatMessage = chatRoomDto.makeChatMessage(chatMessageDto.type)
+            val chatMessage = chatMessageDto.makeChatMessage(chatRoom)
             // 이미지 처리
             if (chatMessageDto.type == MessageType.IMAGE){
                 val chatImage = imageService.uploadChatImage(chatMessageDto, chatMessage)

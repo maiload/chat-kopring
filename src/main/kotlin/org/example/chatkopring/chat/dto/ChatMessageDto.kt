@@ -2,6 +2,7 @@ package org.example.chatkopring.chat.dto
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import org.example.chatkopring.chat.entity.ChatMessage
 import org.example.chatkopring.chat.entity.ChatRoom
 import org.example.chatkopring.common.annotation.ValidEnum
 import org.example.chatkopring.common.status.MessageType
@@ -24,6 +25,7 @@ data class ChatMessageDto(
 ){
     fun toErrorMessage(message: String) = ErrorMessage(message, sender, roomId)
     fun toChatRoomDto(roomType: RoomType) = ChatRoomDto(roomId, sender, roomType)
+    fun makeChatMessage(chatRoom: ChatRoom) = ChatMessage(sender, type, chatRoom, content)
 }
 
 
