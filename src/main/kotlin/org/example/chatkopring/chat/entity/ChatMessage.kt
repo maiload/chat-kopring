@@ -40,5 +40,5 @@ class ChatMessage(
     val images: List<ChatImage>? = null
 
     fun toChatMessageResponse(base64Image: String?): ChatMessageResponse =
-        ChatMessageResponse(id!!, type.name, sender, content, base64Image)
+        ChatMessageResponse(id!!, type.name, sender, content, base64Image, createdDate)
 }
