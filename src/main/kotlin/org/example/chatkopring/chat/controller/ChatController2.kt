@@ -49,9 +49,13 @@ class ChatController2(
         val user = StompHeaderAccessor.wrap(event.message).user
         if(user != null) {
             val customUser = (user as UsernamePasswordAuthenticationToken).principal as CustomUser
-            log.info("New Connection : ${customUser.username} ${user.authorities}")
-            userSessionRegistry.registerSession(customUser.username)
-            messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.CONNECT, user.name))
+            if(!userSessionRegistry.isExist(customUser.username)) {
+                log.info("New Connection : ${customUser.username} ${user.authorities}")
+                userSessionRegistry.registerSession(customUser.username)
+                messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.CONNECT, user.name))
+            }else{
+                log.warn("Connection : ${customUser.username} is already in userSessionRegistry")
+            }
         }
     }
 
@@ -60,15 +64,19 @@ class ChatController2(
         val user = StompHeaderAccessor.wrap(event.message).user
         if(user != null) {
             val customUser = (user as UsernamePasswordAuthenticationToken).principal as CustomUser
-            log.info("User Disconnected : ${customUser.username} ${user.authorities}")
-            userSessionRegistry.removeSession(customUser.username)
-            messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.DISCONNECT, user.name))
-            // INACTIVE 가 아닌 모든 방 INACTIVE
-            val allParticipatedRooms = chatService.loadAllParticipatedRooms(user.name)
-            allParticipatedRooms?.forEach {
-                if(!chatService.isInactivatedRoom(it.chatRoom, user.name)) {
-                    chatService.inactiveRoom(it.toChatRoomDto())
+            if(userSessionRegistry.isExist(customUser.username)) {
+                log.info("User Disconnected : ${customUser.username} ${user.authorities}")
+                userSessionRegistry.removeSession(customUser.username)
+                messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.DISCONNECT, user.name))
+                // INACTIVE 가 아닌 모든 방 INACTIVE
+                val allParticipatedRooms = chatService.loadAllParticipatedRooms(user.name)
+                allParticipatedRooms?.forEach {
+                    if(!chatService.isInactivatedRoom(it.chatRoom, user.name)) {
+                        chatService.inactiveRoom(it.toChatRoomDto())
+                    }
                 }
+            }else{
+                log.warn("Disconnected : ${customUser.username} is not in userSessionRegistry")
             }
         }
     }
