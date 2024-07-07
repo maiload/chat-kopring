@@ -65,7 +65,7 @@ class MessageConsumer(
         val chatRoomDto = mapToChatRoomDto(payload)
         val member = memberService.searchMyInfo(loginId)
         val (roomId, creator, roomType, title) = chatRoomDto
-        if (member.role != Role.ADMIN.name || chatRoomDto.creator != loginId) {
+        if (member.role != Role.ADMIN.name) {
             sendErrorMessage(ErrorMessage("Admin 사용자만 전체 채팅방을 만들 수 있습니다.", creator, roomId))
         }else{
             if (chatService.createRoom(chatRoomDto)){

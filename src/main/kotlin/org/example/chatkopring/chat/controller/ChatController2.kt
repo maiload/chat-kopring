@@ -123,7 +123,7 @@ class ChatController2(
             message = if (response.isNullOrEmpty()) "현재 참여중인 방이 없습니다." else "${response.size}개의 채팅방을 불러왔습니다.")
     }
 
-    fun messageToJSON(dto: Any): String = jacksonObjectMapper().writeValueAsString(dto)
+    private fun messageToJSON(dto: Any): String = jacksonObjectMapper().writeValueAsString(dto)
 
     /**
      * 채팅방 끄기 (INACTIVE)
@@ -131,7 +131,9 @@ class ChatController2(
      */
     @MessageMapping("/chat/outRoom")
     fun outRoom(@Payload @Valid chatRoomDto: ChatRoomDto, headerAccessor: SimpMessageHeaderAccessor) {
-        val message = MessageDto(headerAccessor.user!!.name, MessageType.INACTIVE.name, chatRoomDto)
+        val loginId = headerAccessor.user!!.name
+        validateLoginId(loginId, chatRoomDto, "outRoom")
+        val message = MessageDto(loginId, MessageType.INACTIVE.name, chatRoomDto)
         rabbitTemplate.convertAndSend(rabbitmqConfig.directExchange().name, rabbitmqConfig.outQueue().name, messageToJSON(message))
     }
 
@@ -141,7 +143,9 @@ class ChatController2(
      */
     @MessageMapping("/chat/sendMessage")
     fun sendMessage(@Payload @Valid chatMessageDto: ChatMessageDto, headerAccessor: SimpMessageHeaderAccessor) {
-        val message = MessageDto(headerAccessor.user!!.name, chatMessageDto.type.name, chatMessageDto)
+        val loginId = headerAccessor.user!!.name
+        validateLoginId(loginId, chatMessageDto)
+        val message = MessageDto(loginId, chatMessageDto.type.name, chatMessageDto)
         rabbitTemplate.convertAndSend(rabbitmqConfig.directExchange().name, rabbitmqConfig.sendQueue().name, messageToJSON(message))
     }
 
@@ -151,7 +155,9 @@ class ChatController2(
      */
     @MessageMapping("/chat/leaveRoom")
     fun leaveRoom(@Payload @Valid chatRoomDto: ChatRoomDto, headerAccessor: SimpMessageHeaderAccessor) {
-        val message = MessageDto(headerAccessor.user!!.name, MessageType.LEAVE.name, chatRoomDto)
+        val loginId = headerAccessor.user!!.name
+        validateLoginId(loginId, chatRoomDto, "leaveRoom")
+        val message = MessageDto(loginId, MessageType.LEAVE.name, chatRoomDto)
         rabbitTemplate.convertAndSend(rabbitmqConfig.directExchange().name, rabbitmqConfig.leaveQueue().name, messageToJSON(message))
     }
 
@@ -162,8 +168,10 @@ class ChatController2(
      */
     @MessageMapping("/chat/inviteRoom")
     fun inviteRoom(@Payload @Valid chatRoomDto: ChatRoomDto, headerAccessor: SimpMessageHeaderAccessor) {
+        val loginId = headerAccessor.user!!.name
+        validateLoginId(loginId, chatRoomDto, "inviteRoom")
         log.info("[${chatRoomDto.creator}] invited users to room (${chatRoomDto.roomId})")
-        val message = MessageDto(headerAccessor.user!!.name, MessageType.JOIN.name, chatRoomDto)
+        val message = MessageDto(loginId, MessageType.JOIN.name, chatRoomDto)
         rabbitTemplate.convertAndSend(rabbitmqConfig.directExchange().name, rabbitmqConfig.inviteQueue().name, messageToJSON(message))
     }
 
@@ -174,7 +182,9 @@ class ChatController2(
     @Validated
     @MessageMapping("/chat/createRoom/all")
     fun createAllRoom(@Payload @Valid chatRoomDto: ChatRoomDto, headerAccessor: SimpMessageHeaderAccessor) {
-        val message = MessageDto(headerAccessor.user!!.name, chatRoomDto.roomType.name, chatRoomDto)
+        val loginId = headerAccessor.user!!.name
+        validateLoginId(loginId, chatRoomDto, "createAllRoom")
+        val message = MessageDto(loginId, chatRoomDto.roomType.name, chatRoomDto)
         rabbitTemplate.convertAndSend(rabbitmqConfig.directExchange().name, rabbitmqConfig.createQueue().name, messageToJSON(message))
     }
 
@@ -184,7 +194,9 @@ class ChatController2(
      */
     @MessageMapping("/chat/createRoom/group")
     fun createGroupRoom(@Payload @Valid chatRoomDto: ChatRoomDto, headerAccessor: SimpMessageHeaderAccessor) {
-        val message = MessageDto(headerAccessor.user!!.name, chatRoomDto.roomType.name, chatRoomDto)
+        val loginId = headerAccessor.user!!.name
+        validateLoginId(loginId, chatRoomDto, "createGroupRoom")
+        val message = MessageDto(loginId, chatRoomDto.roomType.name, chatRoomDto)
         rabbitTemplate.convertAndSend(rabbitmqConfig.directExchange().name, rabbitmqConfig.createQueue().name, messageToJSON(message))
     }
 
@@ -195,8 +207,25 @@ class ChatController2(
      */
     @MessageMapping("/chat/createRoom/private")
     fun createPrivateRoom(@Payload @Valid chatRoomDto: ChatRoomDto, headerAccessor: SimpMessageHeaderAccessor) {
-        val message = MessageDto(headerAccessor.user!!.name, chatRoomDto.roomType.name, chatRoomDto)
+        val loginId = headerAccessor.user!!.name
+        validateLoginId(loginId, chatRoomDto, "createPrivateRoom")
+        val message = MessageDto(loginId, chatRoomDto.roomType.name, chatRoomDto)
         rabbitTemplate.convertAndSend(rabbitmqConfig.directExchange().name, rabbitmqConfig.createQueue().name, messageToJSON(message))
+    }
+
+
+    private fun validateLoginId(loginId: String, chatRoomDto: ChatRoomDto, funcName: String){
+        if(loginId != chatRoomDto.creator){
+            chatService.sendErrorMessage(chatRoomDto.toErrorMessage("$funcName() : JWT 토큰의 loginId 와 메세지의 creator 가 일치하지 않습니다."))
+            throw InvalidInputException(message = "Token [$loginId] and Creator [${chatRoomDto.creator}] is not accord")
+        }
+    }
+
+    private fun validateLoginId(loginId: String, chatMessageDto: ChatMessageDto){
+        if(loginId != chatMessageDto.sender){
+            chatService.sendErrorMessage(chatMessageDto.toErrorMessage("sendMessage() : JWT 토큰의 loginId 와 메세지의 creator 가 일치하지 않습니다."))
+            throw InvalidInputException(message = "Token [$loginId] and Creator [${chatMessageDto.sender}] is not accord")
+        }
     }
 
     //    @MessageMapping("/chat/enterRoom")
