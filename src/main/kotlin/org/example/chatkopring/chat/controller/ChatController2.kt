@@ -49,10 +49,9 @@ class ChatController2(
         val user = StompHeaderAccessor.wrap(event.message).user
         if(user != null) {
             val customUser = (user as UsernamePasswordAuthenticationToken).principal as CustomUser
-            if(!userSessionRegistry.isExist(customUser.username)) {
-                log.info("New Connection : ${customUser.username} ${user.authorities}")
-                userSessionRegistry.registerSession(customUser.username)
+            if(userSessionRegistry.registerSession(customUser.username)){
                 messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.CONNECT, user.name))
+                log.info("New Connection : ${customUser.username} ${user.authorities}")
             }else{
                 log.warn("Connection : [${customUser.username}] is already in userSessionRegistry")
             }
@@ -64,10 +63,9 @@ class ChatController2(
         val user = StompHeaderAccessor.wrap(event.message).user
         if(user != null) {
             val customUser = (user as UsernamePasswordAuthenticationToken).principal as CustomUser
-            if(userSessionRegistry.isExist(customUser.username)) {
-                log.info("User Disconnected : ${customUser.username} ${user.authorities}")
-                userSessionRegistry.removeSession(customUser.username)
+            if(userSessionRegistry.removeSession(customUser.username)) {
                 messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.DISCONNECT, user.name))
+                log.info("User Disconnected : ${customUser.username} ${user.authorities}")
                 // INACTIVE 가 아닌 모든 방 INACTIVE
                 val allParticipatedRooms = chatService.loadAllParticipatedRooms(user.name)
                 allParticipatedRooms?.forEach {
