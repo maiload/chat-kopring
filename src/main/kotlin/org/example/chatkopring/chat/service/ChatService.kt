@@ -97,7 +97,7 @@ class ChatService(
             }
 
             chatMessageRepository.save(chatMessage)
-            messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto)
+            messagingTemplate.convertAndSend("/sub/chat/${chatMessageDto.roomId}", chatMessageDto.apply { this.createdDate = chatMessage.createdDate })
 
             val participants = chatRoomRepository.findById(chatMessageDto.roomId).get().participants
             participants?.forEach {

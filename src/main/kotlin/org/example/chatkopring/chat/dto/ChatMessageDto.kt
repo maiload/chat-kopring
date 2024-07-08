@@ -7,6 +7,7 @@ import org.example.chatkopring.chat.entity.ChatRoom
 import org.example.chatkopring.common.annotation.ValidEnum
 import org.example.chatkopring.common.status.MessageType
 import org.example.chatkopring.common.status.RoomType
+import java.time.LocalDateTime
 
 data class ChatMessageDto(
     @field:NotBlank
@@ -23,6 +24,8 @@ data class ChatMessageDto(
 
     val image: String?,
 ){
+    var createdDate: LocalDateTime? = null
+
     fun toErrorMessage(message: String) = ErrorMessage(message, sender, roomId)
     fun toChatRoomDto(roomType: RoomType) = ChatRoomDto(roomId, sender, roomType)
     fun makeChatMessage(chatRoom: ChatRoom) = ChatMessage(sender, type, chatRoom, content)

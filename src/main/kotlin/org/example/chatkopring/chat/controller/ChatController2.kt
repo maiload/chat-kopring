@@ -52,9 +52,10 @@ class ChatController2(
             if(userSessionRegistry.registerSession(customUser.username)){
                 messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.CONNECT, user.name))
                 log.info("New Connection : ${customUser.username} ${user.authorities}")
-            }else{
-                log.warn("Connection : [${customUser.username}] is already in userSessionRegistry")
             }
+//            else{
+//                log.warn("Connection : [${customUser.username}] is already in userSessionRegistry")
+//            }
         }
     }
 
@@ -73,9 +74,10 @@ class ChatController2(
                         chatService.inactiveRoom(it.toChatRoomDto())
                     }
                 }
-            }else{
-                log.warn("Disconnected : [${customUser.username}] is not in userSessionRegistry")
             }
+//            else{
+//                log.warn("Disconnected : [${customUser.username}] is not in userSessionRegistry")
+//            }
         }
     }
 
