@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import jakarta.validation.Valid
 import org.example.chatkopring.chat.config.RabbitmqConfig
 import org.example.chatkopring.chat.config.UserSessionRegistry
+import org.example.chatkopring.chat.config.UserState
 import org.example.chatkopring.chat.dto.*
 import org.example.chatkopring.chat.service.ChatService
 import org.example.chatkopring.common.dto.BaseResponse
@@ -24,10 +25,12 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.stereotype.Controller
+import org.springframework.util.StringUtils
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.server.session.WebSessionManager
 import org.springframework.web.socket.messaging.SessionConnectEvent
 import org.springframework.web.socket.messaging.SessionDisconnectEvent
 import org.springframework.web.socket.messaging.SessionSubscribeEvent
@@ -49,13 +52,13 @@ class ChatController2(
         val user = StompHeaderAccessor.wrap(event.message).user
         if(user != null) {
             val customUser = (user as UsernamePasswordAuthenticationToken).principal as CustomUser
-            if(userSessionRegistry.registerSession(customUser.username)){
+            val state = userSessionRegistry.registerUser(customUser.username)
+            if(state == UserState.CONNECT){
                 messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.CONNECT, user.name))
                 log.info("New Connection : ${customUser.username} ${user.authorities}")
+            } else{
+                log.warn("DUP - Connection : [${customUser.username}]")
             }
-//            else{
-//                log.warn("Connection : [${customUser.username}] is already in userSessionRegistry")
-//            }
         }
     }
 
@@ -64,7 +67,8 @@ class ChatController2(
         val user = StompHeaderAccessor.wrap(event.message).user
         if(user != null) {
             val customUser = (user as UsernamePasswordAuthenticationToken).principal as CustomUser
-            if(userSessionRegistry.removeSession(customUser.username)) {
+            val state = userSessionRegistry.removeUser(customUser.username)
+            if(state == UserState.DISCONNECT) {
                 messagingTemplate.convertAndSend("/sub/chat/public", PublicMessage(MessageType.DISCONNECT, user.name))
                 log.info("User Disconnected : ${customUser.username} ${user.authorities}")
                 // INACTIVE 가 아닌 모든 방 INACTIVE
@@ -74,23 +78,45 @@ class ChatController2(
                         chatService.inactiveRoom(it.toChatRoomDto())
                     }
                 }
+            } else{
+                log.warn("DUP - Disconnection : [${customUser.username}]")
             }
-//            else{
-//                log.warn("Disconnected : [${customUser.username}] is not in userSessionRegistry")
-//            }
         }
     }
 
     @EventListener
     fun handleWebSocketUnsubscribeListener(event: SessionUnsubscribeEvent) {
         val headerAccessor = StompHeaderAccessor.wrap(event.message)
-        log.info("[${headerAccessor.user?.name}] Unsubscribed, Destination : ${headerAccessor.destination}")
+        val username = headerAccessor.user?.name
+        val subId = headerAccessor.subscriptionId
+        if(StringUtils.hasText(username) && StringUtils.hasText(subId)) {
+            val state = userSessionRegistry.removeSession(username!!, subId!!)
+            when (state) {
+                UserState.UNSUBSCRIBE -> log.info("SubId : $subId, [$username] Unsubscribed")
+                UserState.DUP_UNSUBSCRIBE -> log.warn("[$username] DUP - Unsubscription(SubId: $subId)")
+                else -> log.error("[$username] Unsubscribe - NOT_CONNECT")
+            }
+        }else{
+            log.error("Value cannot be NULL (username: $username, subId: $subId)")
+        }
     }
 
     @EventListener
     fun handleWebSocketSubscribeListener(event: SessionSubscribeEvent) {
         val headerAccessor = StompHeaderAccessor.wrap(event.message)
-        log.info("[${headerAccessor.user?.name}] Subscribed, Destination : ${headerAccessor.destination}")
+        val destination = headerAccessor.destination
+        val subId = headerAccessor.subscriptionId
+        val username = headerAccessor.user?.name
+        if(StringUtils.hasText(username) && StringUtils.hasText(subId) && StringUtils.hasText(destination)) {
+            val state = userSessionRegistry.addSession(username!!, subId!!, destination!!)
+            when (state) {
+                UserState.SUBSCRIBE -> log.info("Destination : $destination, SubId : $subId, [$username] Subscribed")
+                UserState.DUP_SUBSCRIBE -> log.warn("[$username] DUP - Subscription(SubId: $subId), Destination : $destination")
+                else -> log.error("[$username] Subscribe - NOT_CONNECT")
+            }
+        }else{
+            log.error("Value cannot be NULL (username: $username, subId: $subId), destination: $destination")
+        }
     }
 
     /**

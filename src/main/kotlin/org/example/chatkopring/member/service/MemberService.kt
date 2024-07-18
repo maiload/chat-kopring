@@ -1,7 +1,6 @@
 package org.example.chatkopring.member.service
 
 import jakarta.transaction.Transactional
-import org.apache.coyote.Response
 import org.example.chatkopring.chat.config.UserSessionRegistry
 import org.example.chatkopring.chat.repository.ChatRoomRepository
 import org.example.chatkopring.chat.repository.ParticipantRepository
@@ -26,28 +25,20 @@ import org.example.chatkopring.member.repository.CompanyRepository
 import org.example.chatkopring.member.repository.MemberRepository
 import org.example.chatkopring.member.repository.MemberRoleRepository
 import org.example.chatkopring.util.logger
-import org.springframework.core.io.FileSystemResource
-import org.springframework.core.io.Resource
 import org.springframework.core.io.UrlResource
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import org.springframework.util.LinkedMultiValueMap
-import org.springframework.util.MultiValueMap
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.util.UriUtils
-import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.Base64
-import javax.print.attribute.standard.Media
 
 //const val PROFILE_IMAGE_OUTPUT_PATH: String = "src/main/resources/images/profile/"
 
@@ -246,7 +237,7 @@ class MemberService(
         val allColleagues = memberRepository.findByCompanyCodeAndState(member.companyCode!!, member.state)
         return if (roomId == null) {   // 모든 회사 사용자
             allColleagues.map { it.toResponseDto().apply {
-                this.isConnected = userSessionRegistry.isExist(this.loginId)
+                this.isConnected = userSessionRegistry.isExistUser(this.loginId)
                 this.profileImage = getImageWithBASE64(it.memberImage)
             } }
         }else{  // 특정 방에 없는 회사 사용자
@@ -254,11 +245,11 @@ class MemberService(
             require(chatRoom.roomType != RoomType.PRIVATE) { throw InvalidInputException(roomId, "PRIVATE 채팅방은 사용자를 초대할 수 없습니다.") }
             allColleagues.filter { !participantRepository.existsByChatRoomAndLoginId(chatRoom, it.loginId) }
                 .map { it.toResponseDto().apply {
-                    this.isConnected = userSessionRegistry.isExist(this.loginId)
+                    this.isConnected = userSessionRegistry.isExistUser(this.loginId)
                     this.profileImage = getImageWithBASE64(it.memberImage)
                 } }
         }
     }
 
-    fun getConnectedUsers(): MutableSet<String> = userSessionRegistry.getUsers()
+    fun getConnectedUsers() = userSessionRegistry.getSessions()
 }

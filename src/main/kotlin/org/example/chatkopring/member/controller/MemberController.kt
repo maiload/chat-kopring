@@ -17,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.util.StringUtils
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import java.util.concurrent.ConcurrentHashMap
 
 @RequestMapping("/api/member")
 @RestController
@@ -150,6 +151,7 @@ class MemberController (
     }
 
     @GetMapping("/users")
-    fun getConnectedUsers(): BaseResponse<MutableSet<String>> = BaseResponse(data = memberService.getConnectedUsers())
+    fun getConnectedUsers(): BaseResponse<ConcurrentHashMap<String, MutableMap<String, String>>> =
+        BaseResponse(data = memberService.getConnectedUsers())
 
 }
